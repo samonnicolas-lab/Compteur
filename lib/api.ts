@@ -159,6 +159,11 @@ export async function fetchEntriesForCounter(counterId: string): Promise<Entry[]
   return (data ?? []) as Entry[];
 }
 
+export async function resetCounterEntries(counterId: string): Promise<void> {
+  const { error } = await supabase.from('entries').delete().eq('counter_id', counterId);
+  if (error) throw error;
+}
+
 export async function uploadEntryPhoto(userId: string, localUri: string): Promise<string> {
   const ext = localUri.split('.').pop()?.toLowerCase() || 'jpg';
   const path = `${userId}/${Date.now()}.${ext}`;

@@ -1,5 +1,17 @@
 // Bornes de périodes calendaires, calculées dans le fuseau horaire local de l'appareil.
 
+function pad2(n: number): string {
+  return n.toString().padStart(2, '0');
+}
+
+// Formate une date/heure locale pour l'affichage, ex. "05/09/2026 à 14:32".
+export function formatDateTime(timestamp: string | Date): string {
+  const d = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  const date = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  return `${date} à ${time}`;
+}
+
 export function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);

@@ -25,12 +25,19 @@ export function distinctLocationCount(entries: GeoEntry[]): number {
   return keys.size;
 }
 
+export interface ClusterEntryDetail {
+  timestamp: string;
+  photoUrl: string | null;
+}
+
 export interface MapCluster {
   key: string;
   lat: number;
   lng: number;
   count: number;
   latestPhotoUrl: string | null;
+  // Clics à ce lieu, du plus récent au plus ancien.
+  entries: ClusterEntryDetail[];
 }
 
 export interface MapEntry {
@@ -50,6 +57,7 @@ export function clusterEntriesByLocation(entries: MapEntry[]): MapCluster[] {
     const lng = roundCoordinate(entry.lng);
     const key = `${lat},${lng}`;
     const ts = new Date(entry.timestamp).getTime();
+    const detail: ClusterEntryDetail = { timestamp: entry.timestamp, photoUrl: entry.photo_url };
 
     const existing = clusters.get(key);
     if (!existing) {
@@ -60,9 +68,11 @@ export function clusterEntriesByLocation(entries: MapEntry[]): MapCluster[] {
         count: 1,
         latestPhotoUrl: entry.photo_url,
         latestTimestamp: ts,
+        entries: [detail],
       });
     } else {
       existing.count += 1;
+      existing.entries.push(detail);
       if (ts >= existing.latestTimestamp) {
         existing.latestTimestamp = ts;
         existing.latestPhotoUrl = entry.photo_url;
@@ -70,5 +80,8 @@ export function clusterEntriesByLocation(entries: MapEntry[]): MapCluster[] {
     }
   }
 
-  return Array.from(clusters.values()).map(({ latestTimestamp: _t, ...rest }) => rest);
+  return Array.from(clusters.values()).map(({ latestTimestamp: _t, entries: es, ...rest }) => ({
+    ...rest,
+    entries: [...es].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+  }));
 }

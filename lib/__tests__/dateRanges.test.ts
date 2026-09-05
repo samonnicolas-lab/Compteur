@@ -1,4 +1,14 @@
-import { countEntriesByPeriod, last7DaysBuckets, startOfWeek } from '../dateRanges';
+import { countEntriesByPeriod, formatDateTime, last7DaysBuckets, startOfWeek } from '../dateRanges';
+
+describe('formatDateTime', () => {
+  it('formats as jj/mm/aaaa à hh:mm, zero-padded', () => {
+    expect(formatDateTime(new Date(2026, 8, 5, 9, 5))).toBe('05/09/2026 à 09:05');
+  });
+
+  it('accepts an ISO string', () => {
+    expect(formatDateTime('2026-01-01T14:32:00')).toBe('01/01/2026 à 14:32');
+  });
+});
 
 describe('startOfWeek', () => {
   it('returns the Monday of the current week', () => {

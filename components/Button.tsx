@@ -13,7 +13,7 @@ import { capsuleRadius, colors, spacing } from '../lib/theme';
 interface ButtonProps {
   label: string;
   onPress: (event: GestureResponderEvent) => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -38,18 +38,28 @@ export function Button({
         variant === 'primary' && styles.primary,
         variant === 'secondary' && styles.secondary,
         variant === 'ghost' && styles.ghost,
+        variant === 'danger' && styles.danger,
         (disabled || loading) && styles.disabled,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'ghost' ? colors.accent : colors.background} />
+        <ActivityIndicator
+          color={
+            variant === 'danger'
+              ? colors.danger
+              : variant === 'ghost'
+                ? colors.accent
+                : colors.background
+          }
+        />
       ) : (
         <Text
           style={[
             styles.label,
             variant === 'ghost' && { color: colors.accent },
             variant === 'secondary' && { color: colors.text },
+            variant === 'danger' && { color: colors.danger },
           ]}
         >
           {label}
@@ -78,6 +88,11 @@ const styles = StyleSheet.create({
   },
   ghost: {
     backgroundColor: 'transparent',
+  },
+  danger: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.danger,
   },
   disabled: {
     opacity: 0.5,

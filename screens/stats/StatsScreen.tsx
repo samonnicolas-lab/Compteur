@@ -7,7 +7,7 @@ import { BarChart } from '../../components/BarChart';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ScreenContainer } from '../../components/ScreenContainer';
-import { fetchCounterById, fetchEntriesForCounter } from '../../lib/api';
+import { fetchCounterById, fetchEntriesForCounter, resetCounterEntries } from '../../lib/api';
 import { countEntriesByPeriod, last7DaysBuckets, PeriodCounts } from '../../lib/dateRanges';
 import { exportEntriesAsCsv } from '../../lib/exportCsv';
 import { colors, spacing } from '../../lib/theme';
@@ -24,6 +24,7 @@ export function StatsScreen({ route }: Props) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -67,6 +68,30 @@ export function StatsScreen({ route }: Props) {
     }
   }
 
+  function handleResetPress() {
+    if (!counter) return;
+    Alert.alert(
+      'Réinitialiser ce compteur ?',
+      `Les ${entries.length} clic${entries.length > 1 ? 's' : ''} enregistrés pour « ${counter.name} » seront définitivement supprimés. Cette action est irréversible.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Réinitialiser', style: 'destructive', onPress: handleResetConfirmed },
+      ]
+    );
+  }
+
+  async function handleResetConfirmed() {
+    setResetting(true);
+    try {
+      await resetCounterEntries(counterId);
+      await load();
+    } catch (error) {
+      Alert.alert('Erreur', (error as Error).message);
+    } finally {
+      setResetting(false);
+    }
+  }
+
   if (loading || !counter) {
     return <ScreenContainer />;
   }
@@ -101,6 +126,15 @@ export function StatsScreen({ route }: Props) {
           onPress={handleExport}
           loading={exporting}
           style={styles.exportButton}
+        />
+
+        <Button
+          label="Réinitialiser le compteur"
+          variant="danger"
+          onPress={handleResetPress}
+          loading={resetting}
+          disabled={entries.length === 0}
+          style={styles.resetButton}
         />
       </ScrollView>
     </ScreenContainer>
@@ -150,6 +184,9 @@ const styles = StyleSheet.create({
   },
   exportButton: {
     marginTop: spacing.lg,
+  },
+  resetButton: {
+    marginTop: spacing.sm,
     marginBottom: spacing.xl,
   },
 });

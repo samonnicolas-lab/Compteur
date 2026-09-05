@@ -53,4 +53,18 @@ describe('clusterEntriesByLocation', () => {
     ]);
     expect(clusters).toHaveLength(0);
   });
+
+  it('lists every entry of a cluster, most recent first', () => {
+    const clusters = clusterEntriesByLocation([
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-01T10:00:00', photo_url: 'a.jpg' },
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-03T08:00:00', photo_url: null },
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-02T10:00:00', photo_url: 'b.jpg' },
+    ]);
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0].entries).toEqual([
+      { timestamp: '2026-01-03T08:00:00', photoUrl: null },
+      { timestamp: '2026-01-02T10:00:00', photoUrl: 'b.jpg' },
+      { timestamp: '2026-01-01T10:00:00', photoUrl: 'a.jpg' },
+    ]);
+  });
 });
