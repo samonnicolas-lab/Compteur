@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Compteur",
+    "slug": "Compteur",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "compteur",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.compteurapp.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Compteur utilise votre position pour enregistrer où vous cliquez, si vous activez la géolocalisation pour un compteur.",
+        "NSCameraUsageDescription": "Compteur utilise l'appareil photo pour ajouter une photo à un clic, si vous activez cette option pour un compteur.",
+        "NSPhotoLibraryUsageDescription": "Compteur accède à vos photos pour vous permettre de choisir une image existante lors d'un clic, si cette option est activée."
+      }
+    },
+    "android": {
+      "package": "com.compteurapp.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#2B1B12",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Compteur utilise votre position pour enregistrer où vous cliquez, si vous activez la géolocalisation pour un compteur."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Compteur accède à vos photos pour vous permettre de choisir une image existante lors d'un clic.",
+          "cameraPermission": "Compteur utilise l'appareil photo pour ajouter une photo à un clic."
+        }
+      ],
+      "expo-audio",
+      "expo-sharing"
+    ]
+  }
+}
