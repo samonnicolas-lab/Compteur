@@ -8,19 +8,18 @@ interface Props {
   onChange: (emoji: string) => void;
 }
 
-// Champ limité à un caractère : ouvre le clavier emoji natif du système,
-// pas besoin de librairie de sélection d'emoji tierce.
+// Ouvre le clavier emoji natif du système, pas besoin de librairie tierce.
+// Le texte est transmis tel quel : de nombreux emojis (teint, drapeaux, familles...)
+// sont composés de plusieurs caractères techniques, et essayer de n'en garder
+// qu'un seul "dernier caractère" les tronque et les casse.
 export function EmojiInput({ value, onChange }: Props) {
   return (
     <View style={styles.wrapper}>
       <TextInput
         value={value}
-        onChangeText={(text) => {
-          const chars = Array.from(text);
-          onChange(chars.length ? chars[chars.length - 1] : '');
-        }}
+        onChangeText={onChange}
         style={styles.input}
-        maxLength={4}
+        maxLength={16}
         placeholder="🐾"
         placeholderTextColor={colors.textMuted}
         textAlign="center"
