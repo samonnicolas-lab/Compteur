@@ -242,6 +242,15 @@ create policy "Un utilisateur ajoute ses propres clics sur un compteur accessibl
     )
   );
 
+-- Nécessaire pour compléter lat/lng en arrière-plan une fois la géolocalisation résolue
+-- (l'entrée est d'abord enregistrée sans position, pour ne pas bloquer le clic).
+drop policy if exists "Un utilisateur peut mettre à jour ses propres clics" on public.entries;
+create policy "Un utilisateur peut mettre à jour ses propres clics"
+  on public.entries for update
+  to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
 drop policy if exists "Un utilisateur peut supprimer ses propres clics" on public.entries;
 create policy "Un utilisateur peut supprimer ses propres clics"
   on public.entries for delete
