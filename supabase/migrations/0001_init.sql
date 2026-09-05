@@ -1,5 +1,7 @@
 -- Compteur — schéma initial
 -- À exécuter dans l'éditeur SQL de votre projet Supabase (ou via `supabase db push`).
+-- Ce script est idempotent : vous pouvez le relancer sans erreur si une exécution
+-- précédente a été interrompue en cours de route.
 
 create extension if not exists "pgcrypto";
 
@@ -14,16 +16,19 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Les profils sont visibles par tous les utilisateurs connectés" on public.profiles;
 create policy "Les profils sont visibles par tous les utilisateurs connectés"
   on public.profiles for select
   to authenticated
   using (true);
 
+drop policy if exists "Un utilisateur peut créer son propre profil" on public.profiles;
 create policy "Un utilisateur peut créer son propre profil"
   on public.profiles for insert
   to authenticated
   with check (id = auth.uid());
 
+drop policy if exists "Un utilisateur peut modifier son propre profil" on public.profiles;
 create policy "Un utilisateur peut modifier son propre profil"
   on public.profiles for update
   to authenticated
@@ -62,6 +67,7 @@ create table if not exists public.sounds (
 
 alter table public.sounds enable row level security;
 
+drop policy if exists "La bibliothèque de sons est publique en lecture" on public.sounds;
 create policy "La bibliothèque de sons est publique en lecture"
   on public.sounds for select
   to authenticated
@@ -114,21 +120,25 @@ as $$
   );
 $$;
 
+drop policy if exists "Un membre voit les groupes dont il fait partie" on public.groups;
 create policy "Un membre voit les groupes dont il fait partie"
   on public.groups for select
   to authenticated
   using (owner_id = auth.uid() or public.is_member_of_group(id));
 
+drop policy if exists "Un utilisateur peut créer un groupe" on public.groups;
 create policy "Un utilisateur peut créer un groupe"
   on public.groups for insert
   to authenticated
   with check (owner_id = auth.uid());
 
+drop policy if exists "Un membre voit la liste des membres de ses groupes" on public.group_members;
 create policy "Un membre voit la liste des membres de ses groupes"
   on public.group_members for select
   to authenticated
   using (public.is_member_of_group(group_id));
 
+drop policy if exists "Un utilisateur peut rejoindre un groupe (s'ajouter lui-même)" on public.group_members;
 create policy "Un utilisateur peut rejoindre un groupe (s'ajouter lui-même)"
   on public.group_members for insert
   to authenticated
@@ -151,6 +161,7 @@ create table if not exists public.counters (
 
 alter table public.counters enable row level security;
 
+drop policy if exists "Un utilisateur voit ses compteurs et ceux de ses groupes" on public.counters;
 create policy "Un utilisateur voit ses compteurs et ceux de ses groupes"
   on public.counters for select
   to authenticated
@@ -159,17 +170,20 @@ create policy "Un utilisateur voit ses compteurs et ceux de ses groupes"
     or (group_id is not null and public.is_member_of_group(group_id))
   );
 
+drop policy if exists "Un utilisateur peut créer ses propres compteurs" on public.counters;
 create policy "Un utilisateur peut créer ses propres compteurs"
   on public.counters for insert
   to authenticated
   with check (owner_id = auth.uid());
 
+drop policy if exists "Un utilisateur peut modifier ses propres compteurs" on public.counters;
 create policy "Un utilisateur peut modifier ses propres compteurs"
   on public.counters for update
   to authenticated
   using (owner_id = auth.uid())
   with check (owner_id = auth.uid());
 
+drop policy if exists "Un utilisateur peut supprimer ses propres compteurs" on public.counters;
 create policy "Un utilisateur peut supprimer ses propres compteurs"
   on public.counters for delete
   to authenticated
@@ -197,6 +211,7 @@ alter table public.entries enable row level security;
 
 -- Un utilisateur voit les entrées des compteurs qu'il possède, ou des compteurs
 -- partagés dans un groupe dont il est membre (nécessaire pour classements/carte communs).
+drop policy if exists "Visibilité des entrées : propriétaire du compteur ou membre du groupe" on public.entries;
 create policy "Visibilité des entrées : propriétaire du compteur ou membre du groupe"
   on public.entries for select
   to authenticated
@@ -211,6 +226,7 @@ create policy "Visibilité des entrées : propriétaire du compteur ou membre du
     )
   );
 
+drop policy if exists "Un utilisateur ajoute ses propres clics sur un compteur accessible" on public.entries;
 create policy "Un utilisateur ajoute ses propres clics sur un compteur accessible"
   on public.entries for insert
   to authenticated
@@ -226,6 +242,7 @@ create policy "Un utilisateur ajoute ses propres clics sur un compteur accessibl
     )
   );
 
+drop policy if exists "Un utilisateur peut supprimer ses propres clics" on public.entries;
 create policy "Un utilisateur peut supprimer ses propres clics"
   on public.entries for delete
   to authenticated
@@ -238,10 +255,12 @@ insert into storage.buckets (id, name, public)
 values ('entry-photos', 'entry-photos', true)
 on conflict (id) do nothing;
 
+drop policy if exists "Photos des entrées lisibles publiquement" on storage.objects;
 create policy "Photos des entrées lisibles publiquement"
   on storage.objects for select
   using (bucket_id = 'entry-photos');
 
+drop policy if exists "Un utilisateur connecté peut déposer une photo dans son propre dossier" on storage.objects;
 create policy "Un utilisateur connecté peut déposer une photo dans son propre dossier"
   on storage.objects for insert
   to authenticated
