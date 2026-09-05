@@ -46,9 +46,9 @@ export function CounterScreen({ route }: Props) {
     }, [load])
   );
 
-  function playClickSound() {
+  async function playClickSound() {
     try {
-      player.seekTo(0);
+      await player.seekTo(0);
       player.play();
     } catch {
       // La lecture du son ne doit jamais empêcher l'enregistrement du clic.
