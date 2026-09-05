@@ -30,7 +30,7 @@ export function BarChart({ data, height = 160 }: Props) {
           const y = height - 24 - barHeight;
           return (
             <Rect
-              key={d.label}
+              key={i}
               x={x}
               y={y}
               width={barWidth}
@@ -42,8 +42,8 @@ export function BarChart({ data, height = 160 }: Props) {
         })}
       </Svg>
       <View style={[styles.labelsRow, { width: chartWidth }]}>
-        {data.map((d) => (
-          <Text key={d.label} style={[styles.label, { width: barWidth + gap }]}>
+        {data.map((d, i) => (
+          <Text key={i} style={[styles.label, { width: barWidth + gap }]}>
             {d.label}
           </Text>
         ))}
