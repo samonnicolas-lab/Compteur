@@ -59,7 +59,10 @@ export function CounterScreen({ route }: Props) {
   async function captureLocationInBackground(entryId: string) {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) return;
+      if (!permission.granted) {
+        console.warn('[geoloc] permission refusée', permission);
+        return;
+      }
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
@@ -69,8 +72,10 @@ export function CounterScreen({ route }: Props) {
         position.coords.longitude,
         position.coords.accuracy ?? null
       );
-    } catch {
+      console.log('[geoloc] position enregistrée pour', entryId, position.coords);
+    } catch (error) {
       // Position indisponible : le clic reste enregistré sans coordonnées.
+      console.warn('[geoloc] échec de la capture/enregistrement de la position', error);
     }
   }
 
