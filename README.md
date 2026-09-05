@@ -4,8 +4,11 @@ Application mobile (React Native + Expo) permettant de créer des compteurs manu
 personnalisés : un gros bouton à appuyer à chaque événement, avec son, géolocalisation
 optionnelle, photo optionnelle, statistiques, export CSV et classements de groupe.
 
-Implémentation basée sur le cahier des charges fourni (`docs/cahier-des-charges.md`
-si vous l'avez copié dans le dépôt, sinon voir le document d'origine).
+Implémentation basée sur le cahier des charges fourni, conservé dans le dépôt sous
+[`docs/cahier-des-charges.md`](./docs/cahier-des-charges.md).
+
+Voir aussi [`RAPPORT.md`](./RAPPORT.md) (bilan de la réalisation et de la validation)
+et [`HANDOVER.md`](./HANDOVER.md) (comment reprendre le projet).
 
 ## Stack
 
