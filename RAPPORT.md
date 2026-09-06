@@ -1,8 +1,40 @@
 # Rapport de réalisation — App Compteur
 
-Date : 2026-09-05
+Date de la version initiale : 2026-09-05 · Mise à jour : 2026-09-06
 Branche : `claude/app-cahier-charges-pgwb0j`
-Commit : `726345d`
+
+## 0. Mise à jour du 06/09 — validation sur appareil réel
+
+La version initiale de ce rapport (section 5) indiquait que rien n'avait pu être
+testé sur un vrai appareil. C'est désormais fait : l'app a tourné sur un iPhone
+réel (via Expo Go + GitHub Codespaces en tunnel) contre un vrai projet Supabase,
+avec deux comptes distincts pour valider le parcours de groupe. Cette session de
+test a révélé et corrigé **6 vrais bugs**, tous absents des vérifications
+statiques (typecheck/lint/tests) puisqu'ils ne se manifestent qu'avec de vraies
+policies Row Level Security évaluées par Postgres :
+
+| Bug trouvé en test réel | Cause | Corrigé par |
+|---|---|---|
+| Emoji cassé/vide dans l'assistant de création | Découpage par point de code Unicode qui tronquait les emojis composés (ZWJ, teint) | Le champ transmet le texte tel quel (`components/EmojiInput.tsx`) |
+| Recherche d'un groupe par code d'invitation impossible | Policy RLS `groups` : il fallait déjà être membre pour voir le groupe qu'on essaie de rejoindre (cercle vicieux) | Policy `select` élargie (`using (true)`) — le code lui-même sert de contrôle d'accès |
+| Rejoindre un groupe échouait encore (`new row violates row-level security policy`) | Même cercle vicieux sur `group_members` : Postgres a besoin de visibilité SELECT pour évaluer la détection de conflit d'un upsert, or `is_member_of_group()` renvoie faux tant qu'on n'est pas déjà membre | Policy `select` sur `group_members` élargie de la même façon |
+| Position GPS jamais enregistrée malgré une capture réussie côté app | Policy RLS `entries` : aucune policy `update` n'existait pour la mise à jour différée de lat/lng (l'update était silencieusement ignoré, 0 ligne, sans erreur) | Ajout de la policy `update` manquante |
+| Son manqué un clic sur deux | `seekTo(0)` (asynchrone) n'était pas attendu avant `play()`, condition de course | `await` ajouté avant la lecture |
+| L'Accueil affichait aussi les compteurs des coéquipiers | La policy RLS `counters` autorise volontairement à voir les compteurs du groupe (nécessaire aux classements), mais la requête de l'Accueil ne filtrait pas explicitement sur le propriétaire | Filtre `owner_id` ajouté côté requête |
+
+Deux avertissements de type "horloge" (`JWT issued at future`) sont apparus à
+plusieurs reprises pendant les tests — dus au fuseau horaire de l'appareil de
+test, sans lien avec le code de l'app.
+
+Amélioration ergonomique ajoutée suite aux retours de test : l'accueil propose
+désormais explicitement **Créer** vs **Rejoindre un compteur** (au lieu de
+découvrir l'option « rejoindre » au milieu de l'assistant de création), et le
+parcours « rejoindre » pré-remplit nom/emoji/son à partir du compteur déjà
+existant du groupe. Deux fonctionnalités demandées en cours de test ont aussi
+été ajoutées : réinitialisation d'un compteur (avec confirmation) et liste
+détaillée des clics par lieu sur la carte (avec miniatures photo).
+
+Le détail complet de chaque correction est dans l'historique Git de la branche.
 
 ## 1. Contexte
 
@@ -79,13 +111,19 @@ globe-trotteur) y compris cas limites (membres à zéro clic, entrées hors pér
 entrées sans coordonnées), génération/normalisation de code d'invitation, et rendu
 de composants UI (`Button`, `RankingList`, `EmojiInput`) avec interactions.
 
-## 5. Non testé dans cet environnement
+## 5. Validé sur appareil réel (voir section 0) / non testé restant
 
-- Le parcours utilisateur réel de bout en bout (inscription, permissions natives,
-  prise de photo, écoute des sons, carte) — nécessite un appareil ou un
-  simulateur.
-- L'intégration avec un vrai projet Supabase (RLS en conditions réelles,
-  upload de photos, temps réel).
-- Le rendu visuel final (couleurs, typographies, motif capsule) sur device.
+**Validé** le 06/09 sur un iPhone via Expo Go, contre un vrai projet Supabase, avec
+deux comptes distincts : inscription/connexion, permissions natives (position,
+photo), son au clic, création solo, création/adhésion de groupe par code
+d'invitation, classements de groupe, export CSV, carte (clusters + miniatures
+photo + liste des clics), réinitialisation d'un compteur.
 
-Voir `HANDOVER.md` pour la marche à suivre afin de compléter cette validation.
+**Non testé restant** :
+- Android (uniquement iOS testé).
+- Le rendu visuel final (couleurs, typographies exactes, motif capsule) n'a pas
+  fait l'objet d'une revue design dédiée.
+- Comportement à grande échelle (beaucoup d'entrées, beaucoup de membres) —
+  voir la limitation « pas de pagination » dans `HANDOVER.md`.
+
+Voir `HANDOVER.md` pour la marche à suivre et les limitations connues.

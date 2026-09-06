@@ -15,10 +15,8 @@ import {
   fetchEntriesForGroup,
   fetchGroupById,
   fetchGroupMembers,
-  joinGroupByInviteCode,
   updateCounterGroupId,
 } from '../../lib/api';
-import { normalizeInviteCode } from '../../lib/inviteCode';
 import { bestLocatorsRanking, globetrotterRanking } from '../../lib/ranking';
 import { colors, spacing } from '../../lib/theme';
 import { Entry, RankingPeriod } from '../../lib/types';
@@ -44,7 +42,6 @@ export function GroupsScreen({ route }: Props) {
   const [loading, setLoading] = useState(true);
 
   const [newGroupName, setNewGroupName] = useState('');
-  const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -93,21 +90,6 @@ export function GroupsScreen({ route }: Props) {
     }
   }
 
-  async function handleJoinGroup() {
-    if (!session || !joinCode.trim()) return;
-    setBusy(true);
-    try {
-      const group = await joinGroupByInviteCode(session.user.id, normalizeInviteCode(joinCode));
-      await updateCounterGroupId(counterId, group.id);
-      setJoinCode('');
-      await load();
-    } catch (error) {
-      Alert.alert('Code invalide', (error as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
   if (loading) {
     return <ScreenContainer />;
   }
@@ -118,8 +100,8 @@ export function GroupsScreen({ route }: Props) {
         <ScrollView>
           <Text style={styles.title}>Ce compteur est en solo</Text>
           <Text style={styles.subtitle}>
-            Partagez-le en créant un groupe, ou rejoignez un groupe existant grâce à un code
-            d’invitation.
+            Partagez-le en créant un groupe autour de lui, pour inviter d’autres personnes à
+            cliquer avec vous et comparer vos statistiques.
           </Text>
 
           <Card style={styles.section}>
@@ -133,17 +115,11 @@ export function GroupsScreen({ route }: Props) {
             <Button label="Créer" onPress={handleCreateGroup} loading={busy} />
           </Card>
 
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>Rejoindre un groupe</Text>
-            <TextField
-              label="Code d’invitation"
-              value={joinCode}
-              onChangeText={setJoinCode}
-              autoCapitalize="characters"
-              placeholder="ex. AB3FGH"
-            />
-            <Button label="Rejoindre" onPress={handleJoinGroup} loading={busy} />
-          </Card>
+          <Text style={styles.helpText}>
+            Pour rejoindre le groupe d’un ami avec un code d’invitation, utilisez plutôt
+            « Rejoindre un compteur » depuis l’accueil — cela crée votre propre exemplaire du
+            compteur partagé.
+          </Text>
         </ScrollView>
       </ScreenContainer>
     );
@@ -200,6 +176,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: spacing.md,
+  },
+  helpText: {
+    color: colors.textMuted,
+    fontSize: 13,
   },
   sectionTitle: {
     color: colors.text,

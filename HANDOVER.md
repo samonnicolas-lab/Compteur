@@ -5,13 +5,14 @@ Ce document explique comment reprendre ce projet là où il en est.
 ## État actuel
 
 - **Branche** : `claude/app-cahier-charges-pgwb0j` (poussée sur `origin`)
-- **Dernier commit** : implémentation complète v1 de l'application, conforme au
-  cahier des charges (`docs/cahier-des-charges.md`)
 - **Aucune pull request n'a été ouverte** (non demandé)
-- Le code compile, passe le typecheck, le lint et 35 tests unitaires — voir
-  `RAPPORT.md` pour le détail. **Il n'a en revanche jamais tourné sur un vrai
-  appareil ni contre un vrai projet Supabase** : c'est la première chose à faire
-  en reprenant ce projet.
+- Le code compile, passe le typecheck, le lint et les tests unitaires — voir
+  `RAPPORT.md` pour le détail.
+- **L'app a été testée sur un vrai iPhone** (Expo Go) contre un vrai projet
+  Supabase, avec deux comptes distincts, le 06/09. Le parcours complet du
+  cahier des charges fonctionne — voir la section 0 de `RAPPORT.md` pour le
+  détail des bugs trouvés et corrigés pendant cette session (essentiellement
+  des policies RLS Supabase manquantes, invisibles en local sans base réelle).
 
 ## Pour reprendre le développement en local
 
@@ -41,18 +42,28 @@ npx expo start
 - Sur simulateur iOS : `npx expo start --ios` (macOS uniquement).
 - Sur émulateur Android : `npx expo start --android`.
 
-### 3. Premier parcours à valider manuellement
+### 3. Parcours déjà validé (à retester si vous modifiez le schéma SQL)
 
-1. Créer un compte (pseudo + email + mot de passe) → vérifier qu'un `profiles`
-   apparaît dans Supabase.
-2. Créer un compteur solo avec géoloc + photo activées → vérifier le clic, la
-   demande de permission, et la ligne dans `entries`.
-3. Créer un second compte, créer un compteur en « rejoindre un groupe » avec le
-   code du premier compte → vérifier que l'écran Groupes affiche bien les deux
-   membres et un classement cohérent.
-4. Vérifier l'export CSV (bouton dans Statistiques) ouvre bien la fenêtre de
-   partage native avec un fichier `.csv` correctement formé.
-5. Vérifier l'écran Carte avec au moins deux clics à des emplacements différents.
+1. Créer un compte (pseudo + email + mot de passe) → un `profiles` apparaît
+   dans Supabase.
+2. Créer un compteur solo avec géoloc + photo activées → le clic, la demande
+   de permission, et la ligne dans `entries` fonctionnent.
+3. Créer un second compte, depuis l'Accueil bouton **+ Nouveau compteur** →
+   **Rejoindre un compteur** → code d'invitation du premier compte → l'écran
+   Groupes affiche bien les deux membres et un classement cohérent.
+4. Export CSV (bouton dans Statistiques) ouvre bien la fenêtre de partage
+   native avec un fichier `.csv` correctement formé.
+5. Carte avec plusieurs clics géolocalisés : clusters, popup avec liste des
+   clics et miniatures photo.
+6. Réinitialisation d'un compteur (bouton rouge dans Statistiques, avec
+   confirmation).
+
+⚠️ Si vous repartez d'un projet Supabase **neuf** en ré-exécutant
+`supabase/migrations/0001_init.sql` en une seule fois, tout devrait fonctionner
+du premier coup (le script est idempotent et inclut déjà toutes les policies
+RLS découvertes nécessaires). Les bugs listés en section 0 de `RAPPORT.md`
+ne se sont manifestés que parce que le schéma avait été appliqué en plusieurs
+fois pendant le développement, avant que ces policies ne soient ajoutées.
 
 ## Limitations connues à traiter avant une mise en production
 
