@@ -139,11 +139,17 @@ create policy "Un utilisateur peut créer un groupe"
   to authenticated
   with check (owner_id = auth.uid());
 
+-- Un utilisateur qui rejoint un groupe pour la première fois n'est pas encore
+-- membre : sans visibilité SELECT sur group_members, Postgres ne peut pas
+-- évaluer la détection de conflit de l'upsert (insert ... on conflict do
+-- update) utilisé pour rejoindre, et bloque l'opération (même problème que
+-- pour la recherche d'un groupe par code d'invitation, cf. plus haut).
 drop policy if exists "Un membre voit la liste des membres de ses groupes" on public.group_members;
-create policy "Un membre voit la liste des membres de ses groupes"
+drop policy if exists "Un utilisateur connecté voit les adhésions (nécessaire pour rejoindre)" on public.group_members;
+create policy "Un utilisateur connecté voit les adhésions (nécessaire pour rejoindre)"
   on public.group_members for select
   to authenticated
-  using (public.is_member_of_group(group_id));
+  using (true);
 
 drop policy if exists "Un utilisateur peut rejoindre un groupe (s'ajouter lui-même)" on public.group_members;
 create policy "Un utilisateur peut rejoindre un groupe (s'ajouter lui-même)"
