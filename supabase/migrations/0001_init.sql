@@ -120,11 +120,16 @@ as $$
   );
 $$;
 
+-- Un utilisateur doit pouvoir chercher un groupe par son code d'invitation pour
+-- le rejoindre, avant même d'en être membre — le code (non devinable) fait office
+-- de contrôle d'accès ; le contenu sensible (compteurs, entries) reste protégé
+-- par ses propres policies RLS.
 drop policy if exists "Un membre voit les groupes dont il fait partie" on public.groups;
-create policy "Un membre voit les groupes dont il fait partie"
+drop policy if exists "Un utilisateur connecté peut chercher un groupe (par ex. via un code d'invitation)" on public.groups;
+create policy "Un utilisateur connecté peut chercher un groupe (par ex. via un code d'invitation)"
   on public.groups for select
   to authenticated
-  using (owner_id = auth.uid() or public.is_member_of_group(id));
+  using (true);
 
 drop policy if exists "Un utilisateur peut créer un groupe" on public.groups;
 create policy "Un utilisateur peut créer un groupe"
