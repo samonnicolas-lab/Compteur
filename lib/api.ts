@@ -2,12 +2,15 @@ import { supabase } from './supabase';
 import { generateInviteCode } from './inviteCode';
 import { Counter, CounterWithTotal, Entry, GroupMember, Profile, SoundId } from './types';
 
-// La RLS de la table `counters` restreint déjà les lignes visibles aux compteurs
-// possédés par l'utilisateur ou partagés dans un groupe dont il est membre.
-export async function fetchMyCounters(): Promise<CounterWithTotal[]> {
+// La RLS de la table `counters` autorise aussi à voir les compteurs des autres
+// membres d'un groupe partagé (nécessaire pour les classements croisés), donc
+// on filtre explicitement sur owner_id ici : l'Accueil ne doit lister que les
+// compteurs de l'utilisateur, pas ceux de ses coéquipiers.
+export async function fetchMyCounters(ownerId: string): Promise<CounterWithTotal[]> {
   const { data: counters, error } = await supabase
     .from('counters')
     .select('*')
+    .eq('owner_id', ownerId)
     .order('created_at', { ascending: false });
   if (error) throw error;
 

@@ -15,19 +15,20 @@ import { RootStackParamList } from '../../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { profile, signOut } = useAuth();
+  const { session, profile, signOut } = useAuth();
   const [counters, setCounters] = useState<CounterWithTotal[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    if (!session) return;
     try {
-      setCounters(await fetchMyCounters());
+      setCounters(await fetchMyCounters(session.user.id));
     } catch (error) {
       Alert.alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [session]);
 
   useFocusEffect(
     useCallback(() => {
