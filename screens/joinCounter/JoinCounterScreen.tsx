@@ -11,6 +11,7 @@ import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
 import { createCounter, fetchGroupByInviteCode, fetchGroupCounterTemplate, joinGroupByInviteCode } from '../../lib/api';
 import { normalizeInviteCode } from '../../lib/inviteCode';
+import { supabase } from '../../lib/supabase';
 import { colors, spacing } from '../../lib/theme';
 import { SoundId } from '../../lib/types';
 import { RootStackParamList } from '../../navigation/types';
@@ -61,9 +62,24 @@ export function JoinCounterScreen({ navigation }: Props) {
     if (!session || !group || !name.trim() || !emoji.trim()) return;
     setJoining(true);
     try {
-      await joinGroupByInviteCode(session.user.id, normalizeInviteCode(inviteCode));
+      const {
+        data: { session: freshSession },
+      } = await supabase.auth.getSession();
+      const userId = freshSession?.user.id ?? session.user.id;
+      console.log(
+        '[join] session (contexte) =',
+        session.user.id,
+        '| session (fraîche) =',
+        freshSession?.user.id,
+        '| code =',
+        normalizeInviteCode(inviteCode),
+        '| group.id =',
+        group.id
+      );
+
+      await joinGroupByInviteCode(userId, normalizeInviteCode(inviteCode));
       const counter = await createCounter({
-        ownerId: session.user.id,
+        ownerId: userId,
         name: name.trim(),
         emoji: emoji.trim(),
         soundId,
@@ -73,6 +89,7 @@ export function JoinCounterScreen({ navigation }: Props) {
       });
       navigation.replace('CounterTabs', { counterId: counter.id });
     } catch (error) {
+      console.warn('[join] échec', error);
       Alert.alert('Impossible de rejoindre', (error as Error).message);
     } finally {
       setJoining(false);
