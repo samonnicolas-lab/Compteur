@@ -67,6 +67,24 @@ fois pendant le développement, avant que ces policies ne soient ajoutées.
 
 ## Limitations connues à traiter avant une mise en production
 
+- **Confirmation d'email désactivée** : « Confirm email » a été décoché dans
+  Supabase (Authentication → Providers → Email) pendant les tests, pour créer
+  plusieurs comptes sans avoir à cliquer un lien à chaque fois. De plus, le
+  lien de confirmation redirige actuellement vers `localhost` (adresse par
+  défaut, jamais configurée) et affiche une erreur de connexion dans le
+  navigateur — la confirmation elle-même aboutit côté serveur malgré cette
+  page d'erreur, mais ce n'est pas correct visuellement. Avant la mise en
+  production :
+  1. Réactivez « Confirm email ».
+  2. Passez `emailRedirectTo: Linking.createURL('/')` (import `expo-linking`)
+     dans l'appel `supabase.auth.signUp()` de `contexts/AuthContext.tsx`, pour
+     rediriger vers le schéma `compteur://` déjà déclaré dans `app.json`
+     plutôt que vers une page web.
+  3. Ajoutez cette URL à la liste blanche **Redirect URLs** du dashboard
+     Supabase (Authentication → URL Configuration).
+  Cette configuration n'a de sens qu'une fois l'app buildée en autonome (EAS
+  Build) : en test via Expo Go + tunnel, l'adresse change à chaque relance du
+  serveur et ne peut pas être enregistrée durablement.
 - **Sons placeholder** : `assets/sounds/*.wav` sont synthétisés par script
   (`gen_sounds.py`, non conservé dans le repo — à regénérer ou remplacer par de
   vrais fichiers audio de même nom si le rendu ne convient pas).
