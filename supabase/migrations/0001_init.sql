@@ -126,7 +126,9 @@ $$;
 -- par ses propres policies RLS.
 drop policy if exists "Un membre voit les groupes dont il fait partie" on public.groups;
 drop policy if exists "Un utilisateur connecté peut chercher un groupe (par ex. via un code d'invitation)" on public.groups;
-create policy "Un utilisateur connecté peut chercher un groupe (par ex. via un code d'invitation)"
+drop policy if exists "Un utilisateur connecté peut chercher un groupe (par ex. via u" on public.groups;
+drop policy if exists "Recherche d'un groupe par code d'invitation" on public.groups;
+create policy "Recherche d'un groupe par code d'invitation"
   on public.groups for select
   to authenticated
   using (true);
