@@ -9,6 +9,7 @@ import { LoginScreen } from '../screens/auth/LoginScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
 import { CreateCounterWizard } from '../screens/createCounter/CreateCounterWizard';
 import { HomeScreen } from '../screens/home/HomeScreen';
+import { JoinCounterScreen } from '../screens/joinCounter/JoinCounterScreen';
 import { CounterTabsNavigator } from './CounterTabsNavigator';
 import { AuthStackParamList, RootStackParamList } from './types';
 
@@ -46,6 +47,16 @@ function MainNavigator() {
         options={{
           headerShown: true,
           title: 'Nouveau compteur',
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+        }}
+      />
+      <RootStack.Screen
+        name="JoinCounter"
+        component={JoinCounterScreen}
+        options={{
+          headerShown: true,
+          title: 'Rejoindre un compteur',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
         }}

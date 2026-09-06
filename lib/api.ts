@@ -62,6 +62,29 @@ export async function createGroup(ownerId: string, name: string) {
   return data;
 }
 
+export async function fetchGroupByInviteCode(inviteCode: string) {
+  const { data, error } = await supabase
+    .from('groups')
+    .select('*')
+    .eq('invite_code', inviteCode)
+    .single();
+  if (error || !data) throw error ?? new Error('Code invalide');
+  return data as { id: string; name: string; invite_code: string; owner_id: string };
+}
+
+// Reprend nom/emoji/son d'un compteur déjà existant du groupe, pour pré-remplir
+// le formulaire de la personne qui rejoint (elle reste libre de les changer).
+export async function fetchGroupCounterTemplate(groupId: string): Promise<Counter | null> {
+  const { data, error } = await supabase
+    .from('counters')
+    .select('*')
+    .eq('group_id', groupId)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Counter) ?? null;
+}
+
 export async function joinGroupByInviteCode(userId: string, inviteCode: string) {
   const { data: group, error } = await supabase
     .from('groups')

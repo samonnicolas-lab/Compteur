@@ -6,6 +6,7 @@ export type AuthStackParamList = {
 export type RootStackParamList = {
   Home: undefined;
   CreateCounter: undefined;
+  JoinCounter: undefined;
   CounterTabs: { counterId: string };
 };
 

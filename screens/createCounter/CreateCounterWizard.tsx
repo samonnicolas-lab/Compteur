@@ -9,15 +9,14 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { SoundPicker } from '../../components/SoundPicker';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
-import { createCounter, createGroup, joinGroupByInviteCode } from '../../lib/api';
-import { normalizeInviteCode } from '../../lib/inviteCode';
+import { createCounter, createGroup } from '../../lib/api';
 import { colors, spacing } from '../../lib/theme';
 import { SoundId } from '../../lib/types';
 import { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateCounter'>;
 
-type ShareMode = 'solo' | 'create-group' | 'join-group';
+type ShareMode = 'solo' | 'create-group';
 
 const STEPS = ['Nom', 'Icône', 'Son', 'Options', 'Partage'] as const;
 
@@ -33,14 +32,12 @@ export function CreateCounterWizard({ navigation }: Props) {
   const [photoEnabled, setPhotoEnabled] = useState(false);
   const [shareMode, setShareMode] = useState<ShareMode>('solo');
   const [newGroupName, setNewGroupName] = useState('');
-  const [inviteCode, setInviteCode] = useState('');
 
   function canGoNext(): boolean {
     if (step === 0) return name.trim().length > 0;
     if (step === 1) return emoji.trim().length > 0;
     if (step === 4) {
       if (shareMode === 'create-group') return newGroupName.trim().length > 0;
-      if (shareMode === 'join-group') return normalizeInviteCode(inviteCode).length > 0;
     }
     return true;
   }
@@ -52,9 +49,6 @@ export function CreateCounterWizard({ navigation }: Props) {
       let groupId: string | null = null;
       if (shareMode === 'create-group') {
         const group = await createGroup(session.user.id, newGroupName.trim());
-        groupId = group.id;
-      } else if (shareMode === 'join-group') {
-        const group = await joinGroupByInviteCode(session.user.id, normalizeInviteCode(inviteCode));
         groupId = group.id;
       }
 
@@ -165,21 +159,10 @@ export function CreateCounterWizard({ navigation }: Props) {
                 placeholder="ex. Chasseurs de teckels"
               />
             )}
-            <ShareOption
-              label="Rejoindre un groupe"
-              description="Entrez le code d’invitation reçu d’un ami."
-              selected={shareMode === 'join-group'}
-              onPress={() => setShareMode('join-group')}
-            />
-            {shareMode === 'join-group' && (
-              <TextField
-                label="Code d’invitation"
-                value={inviteCode}
-                onChangeText={setInviteCode}
-                placeholder="ex. AB3FGH"
-                autoCapitalize="characters"
-              />
-            )}
+            <Text style={styles.helpText}>
+              Pour rejoindre un groupe existant avec un code d’invitation, utilisez plutôt
+              « Rejoindre un compteur » depuis l’accueil.
+            </Text>
           </View>
         )}
       </ScrollView>

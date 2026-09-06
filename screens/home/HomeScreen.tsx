@@ -67,8 +67,14 @@ export function HomeScreen({ navigation }: Props) {
       />
 
       <Button
-        label="+ Créer un compteur"
-        onPress={() => navigation.navigate('CreateCounter')}
+        label="+ Nouveau compteur"
+        onPress={() =>
+          Alert.alert('Nouveau compteur', 'Créer votre propre compteur, ou rejoindre celui d’un ami ?', [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Rejoindre un compteur', onPress: () => navigation.navigate('JoinCounter') },
+            { text: 'Créer un compteur', onPress: () => navigation.navigate('CreateCounter') },
+          ])
+        }
         style={styles.createButton}
       />
     </ScreenContainer>
