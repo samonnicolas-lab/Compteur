@@ -151,6 +151,15 @@ create policy "Un utilisateur peut rejoindre un groupe (s'ajouter lui-même)"
   to authenticated
   with check (user_id = auth.uid());
 
+-- Nécessaire pour l'upsert (insert ... on conflict do update) utilisé pour
+-- rejoindre un groupe de façon idempotente (un ré-essai ne doit pas échouer).
+drop policy if exists "Un utilisateur peut mettre à jour sa propre adhésion à un groupe" on public.group_members;
+create policy "Un utilisateur peut mettre à jour sa propre adhésion à un groupe"
+  on public.group_members for update
+  to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
 -- ---------------------------------------------------------------------------
 -- counters
 -- ---------------------------------------------------------------------------
