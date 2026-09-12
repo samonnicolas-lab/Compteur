@@ -1,0 +1,72 @@
+name: Déploiement web (GitHub Pages)
+
+# Construit la version web (react-native-web / Expo) et la publie sur GitHub
+# Pages à chaque push sur la branche de développement. Nécessite, une seule
+# fois, dans Settings → Pages de ce dépôt : Source = "GitHub Actions".
+#
+# NOTE : `claude/app-cahier-charges-pgwb0j` est la branche par défaut de ce
+# dépôt au moment où ce workflow a été écrit. Si une branche `main` est créée
+# plus tard, remplacez le nom ci-dessous par `main`.
+on:
+  push:
+    branches:
+      - claude/app-cahier-charges-pgwb0j
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement Pages à la fois ; ne pas annuler un déploiement déjà en
+# cours pour éviter de publier une version partielle.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Vérifications (typecheck, lint, tests)
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test -- --silent
+
+      - name: Export du bundle web
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npx expo export --platform web --output-dir dist
+
+      - name: Configuration de GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Publication de l'artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Déploiement sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
