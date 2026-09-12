@@ -1,7 +1,92 @@
 # Rapport de réalisation — App Compteur
 
-Date de la version initiale : 2026-09-05 · Mise à jour : 2026-09-06
+Date de la version initiale : 2026-09-05 · Mise à jour : 2026-09-12
 Branche : `claude/app-cahier-charges-pgwb0j`
+
+## -1. Mise à jour du 12/09 — version web (PWA), en remplacement du mobile
+
+À la demande explicite de l'utilisateur, l'app tourne désormais **comme une
+page web responsive (PWA)**, plutôt que de nécessiter une distribution via
+l'App Store ou le Play Store. Cette version web **remplace** le parcours
+Expo Go + tunnel utilisé jusqu'ici pour les tests. Elle réutilise la quasi
+totalité du code existant grâce à `react-native-web` ; seuls quelques
+fichiers ont une variante web (suffixe `.web.ts(x)`, résolue automatiquement
+par Metro selon la plateforme).
+
+### Ce qui a été ajouté
+
+- **Bundle web + PWA installable** : export via `npx expo export --platform
+  web`, manifest (`public/manifest.json`), icônes (192/512/maskable),
+  favicon, service worker réseau-prioritaire (`public/sw.js`, qui laisse
+  toujours passer les appels Supabase), `public/index.html` personnalisé
+  (lien manifest, apple-touch-icon, enregistrement du service worker).
+  `app.json` configure `web.themeColor`/`description`/`lang` et
+  `experiments.baseUrl = "/Compteur"` (hébergement en sous-dossier GitHub
+  Pages).
+- **Carte sur le web** : `screens/map/MapScreen.web.tsx`, avec Leaflet
+  utilisé directement (pas `react-leaflet`, par prudence vis-à-vis de React
+  19) sur fond OpenStreetMap — réutilise `clusterEntriesByLocation` et
+  `LocationEntriesModal`, comportement identique à la carte native.
+- **Modules natifs adaptés au web** :
+  - `Alert.alert` de React Native est un **no-op silencieux** sur
+    `react-native-web` (confirmé en lisant son code source) : sans
+    correctif, aucune erreur ni les deux choix multi-boutons de l'app
+    (créer/rejoindre un compteur, confirmation de réinitialisation)
+    n'auraient été visibles sur le web. `lib/alert.ts` (natif) /
+    `lib/alert.web.ts` + `components/AlertHost.web.tsx` (web, modale
+    thématisée) corrigent ce point pour tous les appels de l'app.
+  - `expo-file-system` / `expo-sharing` ne sont pas disponibles sur le web :
+    `lib/exportCsv.web.ts` déclenche un téléchargement classique
+    (Blob + lien `<a download>`) à la place du partage natif.
+  - `uploadEntryPhoto` (`lib/api.ts`) déduit maintenant le type/l'extension
+    depuis le `Blob` lui-même plutôt que depuis l'URI locale — l'ancienne
+    logique donnait un résultat invalide pour les URL `blob:` renvoyées par
+    `expo-image-picker` sur le web (pas de point dans l'URI).
+  - `expo-location`, `expo-audio`, `expo-image-picker` et
+    `@react-native-async-storage/async-storage` ont déjà de vraies
+    implémentations web (vérifié dans leurs sources : Geolocation API,
+    `HTMLAudioElement`, `<input type=file>`, `localStorage`) : aucun
+    changement requis.
+- **Mise en page responsive** : `ScreenContainer` (utilisé par la plupart
+  des écrans) et la barre d'onglets du compteur plafonnent maintenant la
+  largeur du contenu à 480px, recentré — l'app reste lisible sur grand écran
+  au lieu de s'étirer sur toute la largeur.
+- **Déploiement continu** : `.github/workflows/deploy-web.yml` construit et
+  publie automatiquement sur GitHub Pages à chaque push (voir `HANDOVER.md`
+  pour les deux réglages ponctuels restant à faire côté GitHub, non
+  accessibles depuis cette session).
+
+### Validation effectuée pour cette version web
+
+Cet environnement d'exécution **bloque au niveau réseau (politique
+d'entreprise, 403) tout accès sortant vers `*.supabase.co`** depuis le
+navigateur Playwright utilisé pour les tests — confirmé en isolant le
+problème avec `curl` en direct. Il n'a donc pas été possible de dérouler ici
+un parcours **authentifié** de bout en bout (inscription → connexion →
+création de compteur → carte avec vraies données). Ce qui a en revanche été
+vérifié réellement, par export du bundle web servi localement sous
+`/Compteur/` (comme sur GitHub Pages) et piloté par Playwright/Chromium :
+
+| Vérification | Résultat |
+|---|---|
+| Chargement de l'app (bundle 1.4 Mo + CSS Leaflet), aucune erreur console/requête échouée | ✅ |
+| Écran de connexion, rendu visuel fidèle au thème | ✅ (capture d'écran) |
+| Modale d'alerte web (`AlertHost`) sur une validation de formulaire côté client | ✅ (capture d'écran) |
+| Mise en page responsive à 390px / 820px / 1440px de large (écran de connexion) | ✅ (captures d'écran) |
+| Manifest, favicon, icônes (192/512/maskable), `sw.js` : chacun répond HTTP 200 sous `/Compteur/` | ✅ |
+| Enregistrement effectif du service worker (scope `/Compteur/`, actif) | ✅ |
+| `npm run typecheck` / `npm run lint` / `npm test` (38/38) / `expo export --platform web` et `--platform ios` | ✅ (à chaque étape) |
+
+**Non vérifié ici** (nécessite un accès réseau complet à Supabase, absent de
+ce bac à sable) : inscription/connexion réelles sur le web, création d'un
+compteur avec écriture en base, affichage de vraies données sur la carte
+Leaflet (tuiles OpenStreetMap incluses), export CSV avec téléchargement
+réel, barre d'onglets du compteur (`CounterTabsNavigator`) en situation
+authentifiée. Ces parcours utilisent du code déjà validé sur iPhone (section
+0) ou des adaptations web au raisonnement simple et à faible risque (CSS
+standard, wrappers directs d'API navigateur) ; ils restent à confirmer par
+un test manuel une fois le site déployé sur GitHub Pages, ou en local dans
+un environnement avec accès réseau complet.
 
 ## 0. Mise à jour du 06/09 — validation sur appareil réel
 
