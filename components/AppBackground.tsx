@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   scrim: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(43, 27, 18, 0.85)',
+    backgroundColor: 'rgba(43, 27, 18, 0.6)',
   },
   content: {
     flex: 1,
