@@ -1,8 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text } from 'react-native';
 
+import { fetchCounterById } from '../lib/api';
 import { colors } from '../lib/theme';
 import { CounterScreen } from '../screens/counter/CounterScreen';
 import { GroupsScreen } from '../screens/groups/GroupsScreen';
@@ -21,8 +22,16 @@ const TAB_ICONS: Record<keyof CounterTabParamList, string> = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CounterTabs'>;
 
-export function CounterTabsNavigator({ route }: Props) {
+export function CounterTabsNavigator({ route, navigation }: Props) {
   const { counterId } = route.params;
+
+  // Affiche le nom du compteur dans le header (voir RootNavigator), qui
+  // porte aussi le bouton retour vers l'Accueil.
+  useEffect(() => {
+    fetchCounterById(counterId)
+      .then((counter) => navigation.setOptions({ title: counter.name }))
+      .catch(() => {});
+  }, [counterId, navigation]);
 
   return (
     <Tab.Navigator

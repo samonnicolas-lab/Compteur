@@ -61,7 +61,16 @@ function MainNavigator() {
           headerTintColor: colors.text,
         }}
       />
-      <RootStack.Screen name="CounterTabs" component={CounterTabsNavigator} />
+      <RootStack.Screen
+        name="CounterTabs"
+        component={CounterTabsNavigator}
+        options={{
+          headerShown: true,
+          title: 'Compteur',
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+        }}
+      />
     </RootStack.Navigator>
   );
 }
