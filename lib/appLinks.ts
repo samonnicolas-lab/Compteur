@@ -6,7 +6,7 @@ export const APP_WEB_URL = 'https://samonnicolas-lab.github.io/Compteur/';
 
 export function buildInviteMessage(counterName: string, inviteCode: string): string {
   return (
-    `Salut !!! Rejoins mon 📊 - ${counterName}.\n` +
+    `Salut !!! Rejoins mon compteur 📊 - ${counterName}.\n` +
     `Clique sur le lien : ${APP_WEB_URL}\n` +
     `1 - créé ton compte\n` +
     `2 - une fois connecté, clique sur + Nouveau compteur\n` +
