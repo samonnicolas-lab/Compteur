@@ -34,7 +34,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "lang": "fr",
+      "themeColor": "#2B1B12",
+      "description": "Créez vos propres compteurs manuels : son, géolocalisation, photo, statistiques et classements de groupe."
+    },
+    "experiments": {
+      "baseUrl": "/Compteur"
     },
     "plugins": [
       [
