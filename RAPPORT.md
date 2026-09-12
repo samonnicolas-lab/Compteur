@@ -86,6 +86,23 @@ authentifiée. Ces parcours utilisent du code déjà validé sur iPhone (section
 0) ou des adaptations web au raisonnement simple et à faible risque (CSS
 standard, wrappers directs d'API navigateur) ; ils restent à confirmer par
 un test manuel une fois le site déployé sur GitHub Pages, ou en local dans
+
+### Mise à jour — validé sur le site déployé (même jour)
+
+Une fois `.github/workflows/deploy-web.yml` réellement exécuté (secrets
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` renseignés par
+l'utilisateur, dépôt rendu public pour activer Pages), le déploiement réel a
+révélé **deux bugs invisibles depuis ce bac à sable**, tous deux corrigés :
+
+| Bug trouvé en déploiement réel | Cause | Corrigé par |
+|---|---|---|
+| Page blanche sur `https://samonnicolas-lab.github.io/Compteur/` | GitHub Pages traite le contenu avec Jekyll par défaut, qui ignore silencieusement les dossiers commençant par `_` — dont `_expo/`, où se trouve le bundle JS/CSS exporté. `index.html` se chargeait, mais jamais le script de l'app | Ajout de `public/.nojekyll` (copié tel quel dans l'export), qui désactive ce traitement |
+| Après correction ci-dessus, écran blanc + `Uncaught Error: supabaseUrl is required` en console | Secret Actions mal orthographié (`EXPO_PUBLIC_SUPABASE_UR`, lettre finale manquante) : le build s'exécutait sans erreur (l'absence de ces variables ne fait qu'un avertissement console côté `lib/supabase.ts`), mais l'app plantait au démarrage faute d'URL Supabase valide | Secret renommé côté GitHub (suppression + recréation, le renommage direct n'étant pas possible) |
+
+Le site déployé a ensuite été validé **avec un vrai compte** créé directement
+depuis le web (inscription + connexion réussies) : la limitation décrite
+juste au-dessus est donc levée — le parcours authentifié complet fonctionne
+bien en production.
 un environnement avec accès réseau complet.
 
 ## 0. Mise à jour du 06/09 — validation sur appareil réel

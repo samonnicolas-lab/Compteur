@@ -16,8 +16,15 @@ Ce document explique comment reprendre ce projet là où il en est.
   des policies RLS Supabase manquantes, invisibles en local sans base réelle).
 - **L'app tourne désormais aussi comme site web / PWA** (`react-native-web`),
   en remplacement du parcours Expo Go + tunnel pour les tests — voir la
-  section -1 de `RAPPORT.md` pour le détail, et « Déployer la version web »
-  ci-dessous pour la mettre en ligne.
+  section -1 de `RAPPORT.md` pour le détail.
+- **Le site est déployé et validé en conditions réelles** :
+  https://samonnicolas-lab.github.io/Compteur/ (inscription + connexion
+  testées avec un vrai compte). Le dépôt est **public** (nécessaire pour
+  GitHub Pages sur un compte gratuit).
+  ⚠️ L'URL expose le nom du compte GitHub (`samonnicolas-lab`) — remplacement
+  par une organisation dédiée, un compte renommé, ou un domaine personnalisé
+  envisagé mais pas encore fait (décision à prendre par l'utilisateur, voir
+  « Changer l'URL » ci-dessous).
 
 ## Pour reprendre le développement en local
 
@@ -75,30 +82,61 @@ fois pendant le développement, avant que ces policies ne soient ajoutées.
 
 ## Déployer la version web (GitHub Pages)
 
-Le workflow `.github/workflows/deploy-web.yml` construit et publie
-automatiquement le site à chaque push sur `claude/app-cahier-charges-pgwb0j`.
-Deux réglages ponctuels, à faire une seule fois dans les paramètres GitHub du
-dépôt (impossibles à faire depuis une session Claude Code, faute d'accès à
-ces écrans) :
+✅ **Déjà fait et validé** : le site est en ligne à
+`https://samonnicolas-lab.github.io/Compteur/`, avec inscription/connexion
+testées sur un vrai compte. Le workflow `.github/workflows/deploy-web.yml`
+publie automatiquement une nouvelle version à chaque push sur
+`claude/app-cahier-charges-pgwb0j`. Pour référence, ce qui a été réglé côté
+GitHub (déjà fait, à ne refaire que sur un nouveau dépôt) :
 
-1. **Settings → Pages** : dans « Build and deployment » → « Source »,
-   sélectionnez **GitHub Actions** (au lieu de « Deploy from a branch »).
-2. **Settings → Secrets and variables → Actions** : ajoutez deux secrets de
-   dépôt (*repository secrets*, pas *environment secrets*) avec les mêmes
-   valeurs que dans votre `.env` local :
-   - `EXPO_PUBLIC_SUPABASE_URL`
-   - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+1. **Settings → General → Danger Zone** : dépôt rendu **public** (nécessaire
+   pour activer Pages sur un compte GitHub gratuit).
+2. **Settings → Pages** : « Source » = **GitHub Actions**.
+3. **Settings → Secrets and variables → Actions** : deux secrets de dépôt
+   (*repository secrets*) — `EXPO_PUBLIC_SUPABASE_URL` et
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY`, mêmes valeurs que dans `.env` local.
+   ⚠️ Vérifiez bien l'orthographe exacte des noms : un `L` manquant sur
+   `EXPO_PUBLIC_SUPABASE_URL` a fait planter l'app en production au premier
+   essai (`Uncaught Error: supabaseUrl is required`), une erreur silencieuse
+   côté build (pas d'échec du workflow, juste un avertissement console).
 
-Une fois ces deux réglages faits, relancez le workflow (onglet **Actions**
-du dépôt → sélectionnez « Déploiement web (GitHub Pages) » → « Run
-workflow », ou repoussez un commit) : le site sera publié à l'adresse
-`https://samonnicolas-lab.github.io/Compteur/`.
+Pour relancer manuellement le workflow après un changement de configuration
+GitHub (sans nouveau commit) : onglet **Actions** du dépôt → « Déploiement
+web (GitHub Pages) » → « Run workflow ».
+
+⚠️ Deux bugs de déploiement trouvés et corrigés une fois testé en conditions
+réelles (invisibles avant, voir la section -1 de `RAPPORT.md`) :
+page blanche par défaut sur GitHub Pages (Jekyll ignore les dossiers
+commençant par `_`, dont `_expo/` — corrigé par `public/.nojekyll`), et le
+secret mal orthographié ci-dessus. Si vous recréez le déploiement ailleurs,
+gardez `public/.nojekyll` dans le dépôt.
 
 ⚠️ Si le nom du dépôt ou son propriétaire changent un jour, deux endroits
 sont à mettre à jour en conséquence : `experiments.baseUrl` dans `app.json`
 (actuellement `/Compteur`) et le nom de branche déclencheur dans
 `.github/workflows/deploy-web.yml` (si une branche `main` est créée plus
 tard, remplacez-y `claude/app-cahier-charges-pgwb0j`).
+
+### Changer l'URL (éviter d'exposer le nom du compte GitHub)
+
+`samonnicolas-lab.github.io` reprend le nom du compte GitHub. Discuté avec
+l'utilisateur le 12/09, décision remise à plus tard. Trois options envisagées,
+par ordre de simplicité :
+
+- **A. Renommer le compte GitHub** (Settings → Account → Change username) :
+  gratuit, immédiat, mais change l'identifiant de tout le compte (pas
+  seulement ce projet).
+- **B. Créer une organisation GitHub dédiée** (nom neutre, ex.
+  `compteur-app`) et y transférer le dépôt : gratuit, ne touche pas au
+  compte personnel — option recommandée. Nécessite de transférer/recréer le
+  dépôt puis de mettre à jour le remote git local.
+- **C. Domaine personnalisé** (ex. `moncompteur.fr`) configuré sur GitHub
+  Pages : URL neutre et mémorisable, mais coût récurrent et configuration
+  DNS en plus.
+
+Dans tous les cas, `experiments.baseUrl` dans `app.json` (actuellement
+`/Compteur`) n'a besoin d'être ajusté que si le nom du dépôt change aussi
+(les options A/B le laissent inchangé si le dépôt garde le nom `Compteur`).
 
 ### Tester la version web en local avant de déployer
 
