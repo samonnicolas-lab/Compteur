@@ -31,7 +31,15 @@ export function CounterTabsNavigator({ route }: Props) {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.background },
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.background,
+          // Sur grand écran (web desktop), recentre la barre plutôt que de
+          // l'étirer sur toute la largeur : mise en page pensée pour mobile.
+          maxWidth: 480,
+          width: '100%',
+          alignSelf: 'center',
+        },
         tabBarIcon: () => (
           <Text style={{ fontSize: 18 }}>
             {TAB_ICONS[tabRoute.name as keyof CounterTabParamList]}

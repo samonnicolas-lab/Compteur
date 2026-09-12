@@ -7,8 +7,12 @@ import { colors, spacing } from '../lib/theme';
 export function ScreenContainer({ style, children, ...rest }: ViewProps) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <View style={[styles.container, style]} {...rest}>
-        {children}
+      {/* Sur grand écran (web desktop), recentre le contenu plutôt que de
+          l'étirer sur toute la largeur : mise en page pensée pour mobile. */}
+      <View style={styles.center}>
+        <View style={[styles.container, style]} {...rest}>
+          {children}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -19,8 +23,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
+    width: '100%',
+    maxWidth: 480,
     padding: spacing.md,
   },
 });
