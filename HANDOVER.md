@@ -177,12 +177,16 @@ qui sert à la racine et fonctionne très bien pour le développement).
   maintenant** (pas seulement « avant production »). La fonctionnalité
   « Mot de passe oublié ? » (écran de connexion → `ForgotPasswordScreen`,
   `AuthContext.requestPasswordReset`/`updatePassword`) envoie un email via
-  `supabase.auth.resetPasswordForEmail()` avec
-  `redirectTo: Linking.createURL('/')`. Pour que le lien reçu par email
-  fonctionne réellement, ajoutez l'URL du site déployé
-  (`https://samonnicolas-lab.github.io/Compteur/`) à la liste blanche
-  **Redirect URLs** du dashboard Supabase (Authentication → URL
-  Configuration) — sinon Supabase refuse la redirection demandée. Sur
+  `supabase.auth.resetPasswordForEmail()`. Sur le web, `redirectTo` est
+  reconstruit explicitement en `${window.location.origin}/Compteur/` (et
+  non plus `Linking.createURL('/')`, qui résout en absolu depuis la racine
+  du domaine et perd le sous-dossier `/Compteur` du déploiement GitHub
+  Pages — le lien reçu par email renvoyait alors vers une page inexistante,
+  404 GitHub Pages, même avec la bonne URL en liste blanche côté Supabase).
+  Pour que le lien reçu par email fonctionne réellement, ajoutez aussi
+  l'URL du site déployé (`https://samonnicolas-lab.github.io/Compteur/`) à
+  la liste blanche **Redirect URLs** du dashboard Supabase (Authentication
+  → URL Configuration) — sinon Supabase refuse la redirection demandée. Sur
   natif, le lien pointe vers `compteur://` mais l'app n'a pas de gestion de
   deep link configurée pour l'intercepter automatiquement (`linking` non
   configuré sur `NavigationContainer`) : la réinitialisation fonctionne de

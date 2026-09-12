@@ -1,6 +1,7 @@
 import { Session } from '@supabase/supabase-js';
 import * as Linking from 'expo-linking';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
 
 import { supabase } from '../lib/supabase';
 import { Profile } from '../lib/types';
@@ -82,7 +83,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       async requestPasswordReset(email) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: Linking.createURL('/'),
+          // Sur le web, Linking.createURL('/') résout en absolu depuis la
+          // racine du domaine et perd le sous-dossier de déploiement GitHub
+          // Pages (experiments.baseUrl = "/Compteur" dans app.json) : le
+          // lien reçu par email pointe alors vers une page inexistante
+          // (404 GitHub Pages). On reconstruit l'URL nous-mêmes dans ce cas.
+          redirectTo:
+            Platform.OS === 'web'
+              ? `${window.location.origin}/Compteur/`
+              : Linking.createURL('/'),
         });
         if (error) throw error;
       },
