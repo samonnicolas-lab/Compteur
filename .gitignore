@@ -7,7 +7,9 @@ node_modules/
 .expo/
 dist/
 web-build/
-expo-env.d.ts
+# expo-env.d.ts est normalement auto-généré (et donc ignoré) par la CLI Expo,
+# mais on le commite : sans lui, `tsc` échoue en CI (aucune commande Expo n'y
+# tourne avant le typecheck pour le régénérer).
 
 # Native
 .kotlin/
