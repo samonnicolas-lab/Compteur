@@ -18,7 +18,9 @@ import {
   fetchGroupMembers,
   updateCounterGroupId,
 } from '../../lib/api';
+import { buildInviteMessage } from '../../lib/appLinks';
 import { bestLocatorsRanking, globetrotterRanking } from '../../lib/ranking';
+import { openSmsWithBody } from '../../lib/sms';
 import { colors, spacing } from '../../lib/theme';
 import { Entry, RankingPeriod } from '../../lib/types';
 import { CounterTabParamList } from '../../navigation/types';
@@ -75,6 +77,20 @@ export function GroupsScreen({ route }: Props) {
       load();
     }, [load])
   );
+
+  function handleInvitePress() {
+    alert(
+      'Inviter un ami',
+      'Voulez-vous envoyer une invitation à un autre utilisateur à rejoindre votre Compteur ?',
+      [
+        { text: 'Non', style: 'cancel' },
+        {
+          text: 'Oui',
+          onPress: () => openSmsWithBody(buildInviteMessage(groupName, inviteCode)),
+        },
+      ]
+    );
+  }
 
   async function handleCreateGroup() {
     if (!session || !newGroupName.trim()) return;
@@ -133,7 +149,9 @@ export function GroupsScreen({ route }: Props) {
     <ScreenContainer>
       <ScrollView>
         <Text style={styles.title}>{groupName}</Text>
-        <Text style={styles.subtitle}>Code d’invitation : {inviteCode}</Text>
+        <TouchableOpacity onPress={handleInvitePress}>
+          <Text style={styles.inviteCode}>Code d’invitation : {inviteCode} 📩</Text>
+        </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Meilleurs localisateurs</Text>
         <View style={styles.periodRow}>
@@ -172,6 +190,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: colors.textMuted,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  inviteCode: {
+    color: colors.textMuted,
+    textDecorationLine: 'underline',
     marginTop: spacing.xs,
     marginBottom: spacing.md,
   },
