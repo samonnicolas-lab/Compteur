@@ -52,30 +52,36 @@ export function MapScreen({ route }: Props) {
     }
   }, [counterId]);
 
+  // Initialise la carte Leaflet à chaque prise de focus de l'onglet, et la
+  // détruit à chaque perte de focus (pas seulement au démontage du
+  // composant). Leaflet manipule le DOM directement, en dehors du rendu
+  // React : sur le web, masquer l'onglet inactif par CSS ne suffit pas
+  // toujours à l'empêcher de rester visible derrière l'onglet actif — lier
+  // le cycle de vie de la carte au focus plutôt qu'au montage règle le
+  // problème quel que soit le mécanisme de masquage utilisé.
   useFocusEffect(
     useCallback(() => {
       load();
+
+      if (containerRef.current && !mapRef.current) {
+        const map = L.map(containerRef.current, {
+          center: DEFAULT_CENTER,
+          zoom: DEFAULT_ZOOM,
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }).addTo(map);
+        mapRef.current = map;
+      }
+
+      return () => {
+        mapRef.current?.remove();
+        mapRef.current = null;
+        markersRef.current = [];
+      };
     }, [load])
   );
-
-  // Initialise la carte Leaflet une seule fois, sur le noeud DOM du conteneur.
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, {
-      center: DEFAULT_CENTER,
-      zoom: DEFAULT_ZOOM,
-    });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
-    mapRef.current = map;
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, []);
 
   // Redessine les marqueurs à chaque changement de clusters, et recadre la vue.
   useEffect(() => {
