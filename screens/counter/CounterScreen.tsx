@@ -162,7 +162,8 @@ export function CounterScreen({ route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    // Transparent pour laisser voir l'image de fond posée par AppBackground.
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,

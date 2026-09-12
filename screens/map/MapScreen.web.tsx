@@ -117,7 +117,9 @@ export function MapScreen({ route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    // Transparent pour laisser voir l'image de fond posée par AppBackground
+    // tant que la carte Leaflet n'a pas fini de s'initialiser.
+    backgroundColor: 'transparent',
   },
   emptyOverlay: {
     position: 'absolute',

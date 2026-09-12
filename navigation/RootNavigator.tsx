@@ -23,7 +23,10 @@ const navigationTheme: Theme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background: colors.background,
+    // Transparent (pas colors.background) pour laisser voir l'image de fond
+    // posée par AppBackground derrière chaque écran ; les en-têtes/barres
+    // d'onglets restent opaques via leurs propres styles.
+    background: 'transparent',
     card: colors.card,
     primary: colors.accent,
     text: colors.text,
@@ -95,7 +98,7 @@ export function RootNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color={colors.accent} size="large" />
       </View>
     );

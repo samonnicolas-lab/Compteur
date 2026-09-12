@@ -81,7 +81,9 @@ export function MapScreen({ route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    // Transparent pour laisser voir l'image de fond posée par AppBackground
+    // tant qu'aucune carte n'est affichée (aucune entrée géolocalisée).
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
