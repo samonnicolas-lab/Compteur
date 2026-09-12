@@ -17,6 +17,9 @@ export const supabase = createClient(supabaseUrl ?? '', supabaseAnonKey ?? '', {
     storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // Nécessaire sur le web pour que le lien de réinitialisation de mot de
+    // passe (qui revient avec un jeton dans l'URL) établisse bien une
+    // session de récupération. Sans effet sur natif (pas de barre d'URL).
+    detectSessionInUrl: true,
   },
 });

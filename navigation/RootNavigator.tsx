@@ -5,7 +5,9 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '../contexts/AuthContext';
 import { colors } from '../lib/theme';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
+import { ResetPasswordScreen } from '../screens/auth/ResetPasswordScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
 import { CreateCounterWizard } from '../screens/createCounter/CreateCounterWizard';
 import { HomeScreen } from '../screens/home/HomeScreen';
@@ -15,6 +17,7 @@ import { AuthStackParamList, RootStackParamList } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
+const RecoveryStack = createNativeStackNavigator();
 
 const navigationTheme: Theme = {
   ...DarkTheme,
@@ -33,7 +36,19 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </AuthStack.Navigator>
+  );
+}
+
+// Affiché à la place du reste de l'app tant qu'une récupération de mot de
+// passe est en cours (voir AuthContext.passwordRecovery) — priment sur
+// AuthNavigator/MainNavigator, session de récupération ou non.
+function RecoveryNavigator() {
+  return (
+    <RecoveryStack.Navigator screenOptions={{ headerShown: false }}>
+      <RecoveryStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+    </RecoveryStack.Navigator>
   );
 }
 
@@ -76,7 +91,7 @@ function MainNavigator() {
 }
 
 export function RootNavigator() {
-  const { session, loading } = useAuth();
+  const { session, loading, passwordRecovery } = useAuth();
 
   if (loading) {
     return (
@@ -88,7 +103,13 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      {session ? <MainNavigator /> : <AuthNavigator />}
+      {passwordRecovery ? (
+        <RecoveryNavigator />
+      ) : session ? (
+        <MainNavigator />
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }

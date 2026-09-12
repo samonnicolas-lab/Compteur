@@ -7,27 +7,31 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
 import { alert } from '../../lib/alert';
-import { colors, fonts, spacing } from '../../lib/theme';
+import { colors, spacing } from '../../lib/theme';
 import { AuthStackParamList } from '../../navigation/types';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
+type Props = NativeStackScreenProps<AuthStackParamList, 'ForgotPassword'>;
 
-export function LoginScreen({ navigation }: Props) {
-  const { signIn } = useAuth();
+export function ForgotPasswordScreen({ navigation }: Props) {
+  const { requestPasswordReset } = useAuth();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
-    if (!email || !password) {
-      alert('Champs manquants', 'Merci de renseigner votre email et votre mot de passe.');
+    if (!email.trim()) {
+      alert('Email manquant', 'Merci de renseigner votre adresse email.');
       return;
     }
     setLoading(true);
     try {
-      await signIn(email.trim(), password);
+      await requestPasswordReset(email.trim());
+      alert(
+        'Email envoyé',
+        'Si un compte existe avec cette adresse, un lien de réinitialisation vient de lui être envoyé. Pensez à vérifier vos courriers indésirables.'
+      );
+      navigation.navigate('Login');
     } catch (error) {
-      alert('Connexion impossible', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -35,8 +39,10 @@ export function LoginScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer style={styles.container}>
-      <Text style={styles.title}>Compteur</Text>
-      <Text style={styles.subtitle}>Connectez-vous pour retrouver vos compteurs</Text>
+      <Text style={styles.title}>Mot de passe oublié</Text>
+      <Text style={styles.subtitle}>
+        Indiquez votre email, nous vous enverrons un lien pour choisir un nouveau mot de passe.
+      </Text>
 
       <TextField
         label="Email"
@@ -46,25 +52,12 @@ export function LoginScreen({ navigation }: Props) {
         keyboardType="email-address"
         placeholder="vous@exemple.com"
       />
-      <TextField
-        label="Mot de passe"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholder="••••••••"
-      />
 
-      <Button label="Se connecter" onPress={handleSubmit} loading={loading} />
+      <Button label="Envoyer le lien" onPress={handleSubmit} loading={loading} />
       <Button
-        label="Mot de passe oublié ?"
+        label="Retour à la connexion"
         variant="ghost"
-        onPress={() => navigation.navigate('ForgotPassword')}
-        style={styles.secondaryAction}
-      />
-      <Button
-        label="Créer un compte"
-        variant="ghost"
-        onPress={() => navigation.navigate('SignUp')}
+        onPress={() => navigation.navigate('Login')}
         style={styles.secondaryAction}
       />
     </ScreenContainer>
@@ -76,8 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontFamily: fonts.titleFallback,
-    fontSize: 40,
+    fontSize: 28,
     fontWeight: '700',
     color: colors.accent,
     textAlign: 'center',

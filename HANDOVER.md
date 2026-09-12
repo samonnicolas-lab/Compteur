@@ -173,6 +173,21 @@ qui sert à la racine et fonctionne très bien pour le développement).
   stable (voir « Déployer la version web » plus haut) : en test via Expo Go
   + tunnel ou `expo start --web`, l'adresse change à chaque relance du
   serveur et ne peut pas être enregistrée durablement.
+- **Réinitialisation de mot de passe : réglage Supabase requis dès
+  maintenant** (pas seulement « avant production »). La fonctionnalité
+  « Mot de passe oublié ? » (écran de connexion → `ForgotPasswordScreen`,
+  `AuthContext.requestPasswordReset`/`updatePassword`) envoie un email via
+  `supabase.auth.resetPasswordForEmail()` avec
+  `redirectTo: Linking.createURL('/')`. Pour que le lien reçu par email
+  fonctionne réellement, ajoutez l'URL du site déployé
+  (`https://samonnicolas-lab.github.io/Compteur/`) à la liste blanche
+  **Redirect URLs** du dashboard Supabase (Authentication → URL
+  Configuration) — sinon Supabase refuse la redirection demandée. Sur
+  natif, le lien pointe vers `compteur://` mais l'app n'a pas de gestion de
+  deep link configurée pour l'intercepter automatiquement (`linking` non
+  configuré sur `NavigationContainer`) : la réinitialisation fonctionne de
+  bout en bout uniquement sur le web pour l'instant, ce qui correspond à la
+  cible principale de l'app.
 - **Parcours web authentifié non testé manuellement** : l'environnement où
   cette version web a été construite bloque au niveau réseau les appels
   sortants vers `*.supabase.co` (politique d'entreprise du bac à sable), donc
