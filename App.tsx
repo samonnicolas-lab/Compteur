@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AlertHost } from './components/AlertHost';
 import { AuthProvider } from './contexts/AuthContext';
 import { RootNavigator } from './navigation/RootNavigator';
 
@@ -12,6 +13,7 @@ export default function App() {
         <RootNavigator />
       </AuthProvider>
       <StatusBar style="light" />
+      <AlertHost />
     </SafeAreaProvider>
   );
 }

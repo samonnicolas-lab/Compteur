@@ -1,10 +1,11 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 import { LocationEntriesModal } from '../../components/LocationEntriesModal';
+import { alert } from '../../lib/alert';
 import { fetchEntriesForCounter } from '../../lib/api';
 import { clusterEntriesByLocation, MapCluster } from '../../lib/geo';
 import { colors, spacing } from '../../lib/theme';
@@ -31,7 +32,7 @@ export function MapScreen({ route }: Props) {
       const entries = await fetchEntriesForCounter(counterId);
       setClusters(clusterEntriesByLocation(entries));
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }

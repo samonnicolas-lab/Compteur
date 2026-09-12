@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import { colors, spacing } from '../../lib/theme';
 import { AuthStackParamList } from '../../navigation/types';
 
@@ -20,7 +21,7 @@ export function SignUpScreen({ navigation }: Props) {
 
   async function handleSubmit() {
     if (!pseudo.trim() || !email || password.length < 6) {
-      Alert.alert(
+      alert(
         'Formulaire incomplet',
         'Choisissez un pseudo, un email valide et un mot de passe d’au moins 6 caractères.'
       );
@@ -29,13 +30,13 @@ export function SignUpScreen({ navigation }: Props) {
     setLoading(true);
     try {
       await signUp(email.trim(), password, pseudo.trim());
-      Alert.alert(
+      alert(
         'Compte créé',
         'Vérifiez votre email si une confirmation est requise, puis connectez-vous.'
       );
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Inscription impossible', (error as Error).message);
+      alert('Inscription impossible', (error as Error).message);
     } finally {
       setLoading(false);
     }

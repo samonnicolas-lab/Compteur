@@ -191,13 +191,17 @@ export async function resetCounterEntries(counterId: string): Promise<void> {
 }
 
 export async function uploadEntryPhoto(userId: string, localUri: string): Promise<string> {
-  const ext = localUri.split('.').pop()?.toLowerCase() || 'jpg';
-  const path = `${userId}/${Date.now()}.${ext}`;
   const response = await fetch(localUri);
   const blob = await response.blob();
+  // Sur le web, localUri est une URL blob: (pas d'extension de fichier) : on déduit
+  // le type et l'extension du Blob lui-même plutôt que de l'URI, ce qui fonctionne
+  // aussi bien pour les file:// natifs que pour les blob: du web.
+  const contentType = blob.type || 'image/jpeg';
+  const ext = contentType.split('/').pop()?.toLowerCase() || 'jpg';
+  const path = `${userId}/${Date.now()}.${ext}`;
 
   const { error } = await supabase.storage.from('entry-photos').upload(path, blob, {
-    contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+    contentType,
   });
   if (error) throw error;
 

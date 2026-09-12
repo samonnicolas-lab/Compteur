@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import { colors, fonts, spacing } from '../../lib/theme';
 import { AuthStackParamList } from '../../navigation/types';
 
@@ -19,14 +20,14 @@ export function LoginScreen({ navigation }: Props) {
 
   async function handleSubmit() {
     if (!email || !password) {
-      Alert.alert('Champs manquants', 'Merci de renseigner votre email et votre mot de passe.');
+      alert('Champs manquants', 'Merci de renseigner votre email et votre mot de passe.');
       return;
     }
     setLoading(true);
     try {
       await signIn(email.trim(), password);
     } catch (error) {
-      Alert.alert('Connexion impossible', (error as Error).message);
+      alert('Connexion impossible', (error as Error).message);
     } finally {
       setLoading(false);
     }

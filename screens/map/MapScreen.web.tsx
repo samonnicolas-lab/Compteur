@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { LocationEntriesModal } from '../../components/LocationEntriesModal';
+import { alert } from '../../lib/alert';
 import { fetchEntriesForCounter } from '../../lib/api';
 import { clusterEntriesByLocation, MapCluster } from '../../lib/geo';
 import { colors, spacing } from '../../lib/theme';
@@ -45,8 +46,7 @@ export function MapScreen({ route }: Props) {
       const entries = await fetchEntriesForCounter(counterId);
       setClusters(clusterEntriesByLocation(entries));
     } catch (error) {
-      // Sur le web, on évite Alert.alert (bloquant côté natif seulement) : un log suffit.
-      console.warn('[carte] échec du chargement des entrées', error);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }

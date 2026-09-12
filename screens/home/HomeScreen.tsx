@@ -1,12 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { CounterCard } from '../../components/CounterCard';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import { fetchMyCounters } from '../../lib/api';
 import { colors, spacing } from '../../lib/theme';
 import { CounterWithTotal } from '../../lib/types';
@@ -24,7 +25,7 @@ export function HomeScreen({ navigation }: Props) {
     try {
       setCounters(await fetchMyCounters(session.user.id));
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ export function HomeScreen({ navigation }: Props) {
       <Button
         label="+ Nouveau compteur"
         onPress={() =>
-          Alert.alert('Nouveau compteur', 'Créer votre propre compteur, ou rejoindre celui d’un ami ?', [
+          alert('Nouveau compteur', 'Créer votre propre compteur, ou rejoindre celui d’un ami ?', [
             { text: 'Annuler', style: 'cancel' },
             { text: 'Rejoindre un compteur', onPress: () => navigation.navigate('JoinCounter') },
             { text: 'Créer un compteur', onPress: () => navigation.navigate('CreateCounter') },

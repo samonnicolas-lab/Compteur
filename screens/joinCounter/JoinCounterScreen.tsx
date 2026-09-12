@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -9,6 +9,7 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { SoundPicker } from '../../components/SoundPicker';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import { createCounter, fetchGroupByInviteCode, fetchGroupCounterTemplate, joinGroupByInviteCode } from '../../lib/api';
 import { normalizeInviteCode } from '../../lib/inviteCode';
 import { supabase } from '../../lib/supabase';
@@ -52,7 +53,7 @@ export function JoinCounterScreen({ navigation }: Props) {
         setPhotoEnabled(template.photo_enabled);
       }
     } catch {
-      Alert.alert('Groupe introuvable', 'Vérifiez le code d’invitation et réessayez.');
+      alert('Groupe introuvable', 'Vérifiez le code d’invitation et réessayez.');
     } finally {
       setSearching(false);
     }
@@ -90,7 +91,7 @@ export function JoinCounterScreen({ navigation }: Props) {
       navigation.replace('CounterTabs', { counterId: counter.id });
     } catch (error) {
       console.warn('[join] échec', error);
-      Alert.alert('Impossible de rejoindre', (error as Error).message);
+      alert('Impossible de rejoindre', (error as Error).message);
     } finally {
       setJoining(false);
     }

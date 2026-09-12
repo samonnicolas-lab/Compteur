@@ -1,7 +1,7 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -9,6 +9,7 @@ import { RankingList } from '../../components/RankingList';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import {
   createGroup,
   fetchCounterById,
@@ -63,7 +64,7 @@ export function GroupsScreen({ route }: Props) {
       setMembers(groupMembers.map((m) => ({ user_id: m.user_id, pseudo: m.profiles.pseudo })));
       setEntries(groupEntries);
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ export function GroupsScreen({ route }: Props) {
       setNewGroupName('');
       await load();
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setBusy(false);
     }

@@ -1,12 +1,13 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BarChart } from '../../components/BarChart';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { alert } from '../../lib/alert';
 import { fetchCounterById, fetchEntriesForCounter, resetCounterEntries } from '../../lib/api';
 import { countEntriesByPeriod, last7DaysBuckets, PeriodCounts } from '../../lib/dateRanges';
 import { exportEntriesAsCsv } from '../../lib/exportCsv';
@@ -35,7 +36,7 @@ export function StatsScreen({ route }: Props) {
       setCounter(c);
       setEntries(e);
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ export function StatsScreen({ route }: Props) {
         }))
       );
     } catch (error) {
-      Alert.alert('Export impossible', (error as Error).message);
+      alert('Export impossible', (error as Error).message);
     } finally {
       setExporting(false);
     }
@@ -70,7 +71,7 @@ export function StatsScreen({ route }: Props) {
 
   function handleResetPress() {
     if (!counter) return;
-    Alert.alert(
+    alert(
       'Réinitialiser ce compteur ?',
       `Les ${entries.length} clic${entries.length > 1 ? 's' : ''} enregistrés pour « ${counter.name} » seront définitivement supprimés. Cette action est irréversible.`,
       [
@@ -86,7 +87,7 @@ export function StatsScreen({ route }: Props) {
       await resetCounterEntries(counterId);
       await load();
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setResetting(false);
     }

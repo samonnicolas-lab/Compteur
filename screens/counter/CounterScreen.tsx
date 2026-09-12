@@ -3,8 +3,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAudioPlayer } from 'expo-audio';
 import * as Location from 'expo-location';
 import React, { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { alert } from '../../lib/alert';
 import { colors, spacing } from '../../lib/theme';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -42,7 +43,7 @@ export function CounterScreen({ route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      load().catch((error) => Alert.alert('Erreur', (error as Error).message));
+      load().catch((error) => alert('Erreur', (error as Error).message));
     }, [load])
   );
 
@@ -88,7 +89,7 @@ export function CounterScreen({ route }: Props) {
         try {
           photoUrl = await uploadEntryPhoto(session.user.id, photoUri);
         } catch (error) {
-          Alert.alert('Photo non envoyée', (error as Error).message);
+          alert('Photo non envoyée', (error as Error).message);
         }
       }
 
@@ -107,7 +108,7 @@ export function CounterScreen({ route }: Props) {
         captureLocationInBackground(entry.id);
       }
     } catch (error) {
-      Alert.alert('Erreur', (error as Error).message);
+      alert('Erreur', (error as Error).message);
     } finally {
       setSaving(false);
     }

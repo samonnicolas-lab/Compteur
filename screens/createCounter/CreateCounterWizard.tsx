@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -9,6 +9,7 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { SoundPicker } from '../../components/SoundPicker';
 import { TextField } from '../../components/TextField';
 import { useAuth } from '../../contexts/AuthContext';
+import { alert } from '../../lib/alert';
 import { createCounter, createGroup } from '../../lib/api';
 import { colors, spacing } from '../../lib/theme';
 import { SoundId } from '../../lib/types';
@@ -64,7 +65,7 @@ export function CreateCounterWizard({ navigation }: Props) {
 
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Impossible de créer le compteur', (error as Error).message);
+      alert('Impossible de créer le compteur', (error as Error).message);
     } finally {
       setSubmitting(false);
     }
