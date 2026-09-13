@@ -43,9 +43,17 @@ const navigationTheme: Theme = {
 function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-      <AuthStack.Screen name="Login" component={LoginScreen} />
-      <AuthStack.Screen name="SignUp" component={SignUpScreen} />
-      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen name="Login" component={LoginScreen} options={{ title: 'Compteur' }} />
+      <AuthStack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ title: 'Créer un compte' }}
+      />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ title: 'Mot de passe oublié' }}
+      />
     </AuthStack.Navigator>
   );
 }
@@ -56,7 +64,11 @@ function AuthNavigator() {
 function RecoveryNavigator() {
   return (
     <RecoveryStack.Navigator screenOptions={{ headerShown: false }}>
-      <RecoveryStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+      <RecoveryStack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{ title: 'Nouveau mot de passe' }}
+      />
     </RecoveryStack.Navigator>
   );
 }
@@ -64,7 +76,7 @@ function RecoveryNavigator() {
 function MainNavigator() {
   return (
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
-      <RootStack.Screen name="Home" component={HomeScreen} />
+      <RootStack.Screen name="Home" component={HomeScreen} options={{ title: 'Compteur' }} />
       <RootStack.Screen
         name="CreateCounter"
         component={CreateCounterWizard}
