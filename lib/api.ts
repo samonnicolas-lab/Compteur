@@ -115,6 +115,17 @@ export async function updateCounterGroupId(counterId: string, groupId: string): 
   if (error) throw error;
 }
 
+export async function updateCounterSettings(
+  counterId: string,
+  settings: { geolocEnabled: boolean; photoEnabled: boolean }
+): Promise<void> {
+  const { error } = await supabase
+    .from('counters')
+    .update({ geoloc_enabled: settings.geolocEnabled, photo_enabled: settings.photoEnabled })
+    .eq('id', counterId);
+  if (error) throw error;
+}
+
 export async function fetchEntriesForGroup(groupId: string): Promise<Entry[]> {
   const { data, error } = await supabase
     .from('entries')

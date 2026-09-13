@@ -9,6 +9,7 @@ import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { ResetPasswordScreen } from '../screens/auth/ResetPasswordScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
+import { CounterSettingsScreen } from '../screens/counter/CounterSettingsScreen';
 import { CreateCounterWizard } from '../screens/createCounter/CreateCounterWizard';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { JoinCounterScreen } from '../screens/joinCounter/JoinCounterScreen';
@@ -85,6 +86,16 @@ function MainNavigator() {
         options={{
           headerShown: true,
           title: 'Compteur',
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+        }}
+      />
+      <RootStack.Screen
+        name="CounterSettings"
+        component={CounterSettingsScreen}
+        options={{
+          headerShown: true,
+          title: 'Réglages',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
         }}

@@ -1,5 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { useFocusEffect } from '@react-navigation/native';
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAudioPlayer } from 'expo-audio';
 import * as Location from 'expo-location';
 import React, { useCallback, useState } from 'react';
@@ -17,12 +18,15 @@ import {
 } from '../../lib/api';
 import { SOUND_ASSETS } from '../../lib/sounds';
 import { Counter } from '../../lib/types';
-import { CounterTabParamList } from '../../navigation/types';
+import { CounterTabParamList, RootStackParamList } from '../../navigation/types';
 import { PhotoStepModal } from './PhotoStepModal';
 
-type Props = BottomTabScreenProps<CounterTabParamList, 'Compteur'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<CounterTabParamList, 'Compteur'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
-export function CounterScreen({ route }: Props) {
+export function CounterScreen({ route, navigation }: Props) {
   const { counterId } = route.params;
   const { session } = useAuth();
   const [counter, setCounter] = useState<Counter | null>(null);
@@ -131,6 +135,15 @@ export function CounterScreen({ route }: Props) {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Réglages du compteur"
+        onPress={() => navigation.navigate('CounterSettings', { counterId })}
+        style={styles.settingsButton}
+      >
+        <Text style={styles.settingsIcon}>⚙️</Text>
+      </TouchableOpacity>
+
       <Text style={styles.name}>{counter.name}</Text>
       <Text style={styles.total}>{total}</Text>
 
@@ -167,6 +180,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: spacing.lg,
+    left: spacing.lg,
+    zIndex: 1,
+    padding: spacing.xs,
+  },
+  settingsIcon: {
+    fontSize: 26,
   },
   name: {
     color: colors.text,

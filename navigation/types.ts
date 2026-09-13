@@ -9,6 +9,7 @@ export type RootStackParamList = {
   CreateCounter: undefined;
   JoinCounter: undefined;
   CounterTabs: { counterId: string };
+  CounterSettings: { counterId: string };
 };
 
 export type CounterTabParamList = {
