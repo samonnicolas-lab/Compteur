@@ -5,6 +5,7 @@ import { useAudioPlayer } from 'expo-audio';
 import * as Location from 'expo-location';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { alert } from '../../lib/alert';
 import { colors, spacing } from '../../lib/theme';
@@ -33,6 +34,7 @@ export function CounterScreen({ route, navigation }: Props) {
   const [total, setTotal] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const player = useAudioPlayer(counter ? SOUND_ASSETS[counter.sound_id] : undefined);
 
@@ -139,7 +141,7 @@ export function CounterScreen({ route, navigation }: Props) {
         accessibilityRole="button"
         accessibilityLabel="Réglages du compteur"
         onPress={() => navigation.navigate('CounterSettings', { counterId })}
-        style={styles.settingsButton}
+        style={[styles.settingsButton, { top: insets.top + spacing.sm }]}
       >
         <Text style={styles.settingsIcon}>⚙️</Text>
       </TouchableOpacity>
@@ -148,7 +150,7 @@ export function CounterScreen({ route, navigation }: Props) {
         accessibilityRole="button"
         accessibilityLabel="Retour à Mes Compteurs"
         onPress={() => navigation.navigate('Home')}
-        style={styles.backButton}
+        style={[styles.backButton, { top: insets.top + spacing.sm }]}
       >
         <Text style={styles.backButtonText}>← Mes Compteurs</Text>
       </TouchableOpacity>
@@ -191,8 +193,10 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   settingsButton: {
+    // "top" est complété dynamiquement avec l'inset de zone sûre (encoche /
+    // barre de statut) : l'en-tête natif étant masqué sur cet onglet, rien
+    // d'autre ne réserve cet espace.
     position: 'absolute',
-    top: spacing.lg,
     left: spacing.lg,
     zIndex: 1,
     padding: spacing.xs,
@@ -202,7 +206,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: spacing.lg,
     right: spacing.lg,
     zIndex: 1,
     padding: spacing.xs,
