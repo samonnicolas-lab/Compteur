@@ -144,6 +144,15 @@ export function CounterScreen({ route, navigation }: Props) {
         <Text style={styles.settingsIcon}>⚙️</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Retour à Mes Compteurs"
+        onPress={() => navigation.navigate('Home')}
+        style={styles.backButton}
+      >
+        <Text style={styles.backButtonText}>← Mes Compteurs</Text>
+      </TouchableOpacity>
+
       <Text style={styles.name}>{counter.name}</Text>
       <Text style={styles.total}>{total}</Text>
 
@@ -190,6 +199,18 @@ const styles = StyleSheet.create({
   },
   settingsIcon: {
     fontSize: 26,
+  },
+  backButton: {
+    position: 'absolute',
+    top: spacing.lg,
+    right: spacing.lg,
+    zIndex: 1,
+    padding: spacing.xs,
+  },
+  backButtonText: {
+    color: colors.accentLight,
+    fontSize: 14,
+    fontWeight: '600',
   },
   name: {
     color: colors.text,
