@@ -40,6 +40,8 @@ export interface Counter {
 
 export interface CounterWithTotal extends Counter {
   total_entries: number;
+  // Nombre de membres du groupe partagé, uniquement si group_id est renseigné.
+  group_member_count: number | null;
 }
 
 export interface Entry {

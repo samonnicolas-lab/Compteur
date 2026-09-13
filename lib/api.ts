@@ -20,7 +20,21 @@ export async function fetchMyCounters(ownerId: string): Promise<CounterWithTotal
       .from('entries')
       .select('*', { count: 'exact', head: true })
       .eq('counter_id', counter.id);
-    results.push({ ...(counter as Counter), total_entries: count ?? 0 });
+
+    let groupMemberCount: number | null = null;
+    if (counter.group_id) {
+      const { count: memberCount } = await supabase
+        .from('group_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('group_id', counter.group_id);
+      groupMemberCount = memberCount ?? 0;
+    }
+
+    results.push({
+      ...(counter as Counter),
+      total_entries: count ?? 0,
+      group_member_count: groupMemberCount,
+    });
   }
   return results;
 }

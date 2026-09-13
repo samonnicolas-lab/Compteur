@@ -21,7 +21,11 @@ export function CounterCard({ counter, onPress }: Props) {
           </Text>
           <Text style={styles.total}>{counter.total_entries} clic{counter.total_entries > 1 ? 's' : ''}</Text>
         </View>
-        {counter.group_id ? <Text style={styles.badge}>Groupe</Text> : null}
+        {counter.group_id ? (
+          <Text style={styles.badge}>
+            Groupe{counter.group_member_count != null ? ` · ${counter.group_member_count} membre${counter.group_member_count > 1 ? 's' : ''}` : ''}
+          </Text>
+        ) : null}
       </Card>
     </TouchableOpacity>
   );
