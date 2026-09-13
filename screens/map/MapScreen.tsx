@@ -6,7 +6,7 @@ import MapView, { Marker } from 'react-native-maps';
 
 import { LocationEntriesModal } from '../../components/LocationEntriesModal';
 import { alert } from '../../lib/alert';
-import { fetchEntriesForCounter } from '../../lib/api';
+import { fetchEntriesForMap } from '../../lib/api';
 import { clusterEntriesByLocation, MapCluster } from '../../lib/geo';
 import { colors, spacing } from '../../lib/theme';
 import { CounterTabParamList } from '../../navigation/types';
@@ -29,8 +29,18 @@ export function MapScreen({ route }: Props) {
 
   const load = useCallback(async () => {
     try {
-      const entries = await fetchEntriesForCounter(counterId);
-      setClusters(clusterEntriesByLocation(entries));
+      const entries = await fetchEntriesForMap(counterId);
+      setClusters(
+        clusterEntriesByLocation(
+          entries.map((e) => ({
+            lat: e.lat,
+            lng: e.lng,
+            timestamp: e.timestamp,
+            photo_url: e.photo_url,
+            pseudo: e.profiles?.pseudo ?? null,
+          }))
+        )
+      );
     } catch (error) {
       alert('Erreur', (error as Error).message);
     } finally {

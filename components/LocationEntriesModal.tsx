@@ -39,7 +39,10 @@ export function LocationEntriesModal({ cluster, onClose }: Props) {
                 ) : (
                   <View style={styles.thumbnailPlaceholder} />
                 )}
-                <Text style={styles.rowText}>{formatDateTime(item.timestamp)}</Text>
+                <View>
+                  {item.pseudo && <Text style={styles.rowPseudo}>{item.pseudo}</Text>}
+                  <Text style={styles.rowText}>{formatDateTime(item.timestamp)}</Text>
+                </View>
               </View>
             )}
           />
@@ -122,6 +125,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: spacing.md,
     backgroundColor: colors.background,
+  },
+  rowPseudo: {
+    color: colors.accentLight,
+    fontSize: 13,
+    fontWeight: '600',
   },
   rowText: {
     color: colors.text,

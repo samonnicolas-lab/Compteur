@@ -185,6 +185,36 @@ export async function fetchEntriesForCounter(counterId: string): Promise<Entry[]
   return (data ?? []) as Entry[];
 }
 
+export interface EntryWithPseudo extends Entry {
+  profiles: { pseudo: string } | null;
+}
+
+// Entrées à afficher sur la Carte : celles de tout le groupe (avec le pseudo
+// de chaque auteur) si le compteur en fait partie, sinon seulement celles de
+// ce compteur (compteur solo). La RLS de `entries` autorise déjà tout membre
+// d'un groupe à voir les clics des compteurs du groupe.
+export async function fetchEntriesForMap(counterId: string): Promise<EntryWithPseudo[]> {
+  const counter = await fetchCounterById(counterId);
+
+  if (counter.group_id) {
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*, counters!inner(group_id), profiles(pseudo)')
+      .eq('counters.group_id', counter.group_id)
+      .order('timestamp', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as EntryWithPseudo[];
+  }
+
+  const { data, error } = await supabase
+    .from('entries')
+    .select('*, profiles(pseudo)')
+    .eq('counter_id', counterId)
+    .order('timestamp', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as unknown as EntryWithPseudo[];
+}
+
 export async function resetCounterEntries(counterId: string): Promise<void> {
   const { error } = await supabase.from('entries').delete().eq('counter_id', counterId);
   if (error) throw error;

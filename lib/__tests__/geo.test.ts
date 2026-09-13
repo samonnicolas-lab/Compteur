@@ -56,15 +56,15 @@ describe('clusterEntriesByLocation', () => {
 
   it('lists every entry of a cluster, most recent first', () => {
     const clusters = clusterEntriesByLocation([
-      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-01T10:00:00', photo_url: 'a.jpg' },
-      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-03T08:00:00', photo_url: null },
-      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-02T10:00:00', photo_url: 'b.jpg' },
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-01T10:00:00', photo_url: 'a.jpg', pseudo: 'Alice' },
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-03T08:00:00', photo_url: null, pseudo: 'Bob' },
+      { lat: 48.1173, lng: -1.6778, timestamp: '2026-01-02T10:00:00', photo_url: 'b.jpg', pseudo: 'Alice' },
     ]);
     expect(clusters).toHaveLength(1);
     expect(clusters[0].entries).toEqual([
-      { timestamp: '2026-01-03T08:00:00', photoUrl: null },
-      { timestamp: '2026-01-02T10:00:00', photoUrl: 'b.jpg' },
-      { timestamp: '2026-01-01T10:00:00', photoUrl: 'a.jpg' },
+      { timestamp: '2026-01-03T08:00:00', photoUrl: null, pseudo: 'Bob' },
+      { timestamp: '2026-01-02T10:00:00', photoUrl: 'b.jpg', pseudo: 'Alice' },
+      { timestamp: '2026-01-01T10:00:00', photoUrl: 'a.jpg', pseudo: 'Alice' },
     ]);
   });
 });

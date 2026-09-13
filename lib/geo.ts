@@ -28,6 +28,7 @@ export function distinctLocationCount(entries: GeoEntry[]): number {
 export interface ClusterEntryDetail {
   timestamp: string;
   photoUrl: string | null;
+  pseudo: string | null;
 }
 
 export interface MapCluster {
@@ -45,6 +46,7 @@ export interface MapEntry {
   lng: number | null;
   timestamp: string;
   photo_url: string | null;
+  pseudo?: string | null;
 }
 
 // Regroupe les entrées géolocalisées par lieu arrondi, pour l'affichage sur la carte.
@@ -57,7 +59,11 @@ export function clusterEntriesByLocation(entries: MapEntry[]): MapCluster[] {
     const lng = roundCoordinate(entry.lng);
     const key = `${lat},${lng}`;
     const ts = new Date(entry.timestamp).getTime();
-    const detail: ClusterEntryDetail = { timestamp: entry.timestamp, photoUrl: entry.photo_url };
+    const detail: ClusterEntryDetail = {
+      timestamp: entry.timestamp,
+      photoUrl: entry.photo_url,
+      pseudo: entry.pseudo ?? null,
+    };
 
     const existing = clusters.get(key);
     if (!existing) {
