@@ -1,4 +1,9 @@
-import { DarkTheme, NavigationContainer, Theme } from '@react-navigation/native';
+import {
+  DarkTheme,
+  NavigationContainer,
+  Theme,
+  getFocusedRouteNameFromRoute,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -83,12 +88,16 @@ function MainNavigator() {
       <RootStack.Screen
         name="CounterTabs"
         component={CounterTabsNavigator}
-        options={{
-          headerShown: true,
+        options={({ route }) => ({
+          // L'onglet Compteur gère son propre "en-tête" dans son contenu
+          // (icône réglages + lien "Mes Compteurs") : on masque l'en-tête
+          // natif seulement sur cet onglet, les 3 autres (Statistiques,
+          // Groupes, Carte) le gardent (titre + flèche retour).
+          headerShown: (getFocusedRouteNameFromRoute(route) ?? 'Compteur') !== 'Compteur',
           title: 'Compteur',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-        }}
+        })}
       />
       <RootStack.Screen
         name="CounterSettings"
