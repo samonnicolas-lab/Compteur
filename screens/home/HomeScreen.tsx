@@ -5,6 +5,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { CounterCard } from '../../components/CounterCard';
+import { InstallAppButton } from '../../components/InstallAppButton';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { useAuth } from '../../contexts/AuthContext';
 import { alert } from '../../lib/alert';
@@ -67,6 +68,8 @@ export function HomeScreen({ navigation }: Props) {
           />
         )}
       />
+
+      <InstallAppButton />
 
       <Button
         label="+ Nouveau compteur"
