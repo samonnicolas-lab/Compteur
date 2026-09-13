@@ -129,6 +129,13 @@ export async function updateCounterGroupId(counterId: string, groupId: string): 
   if (error) throw error;
 }
 
+// Le nom du groupe est une seule ligne en base, visible par tous ses
+// membres : le renommer met à jour l'affichage pour tout le monde.
+export async function updateGroupName(groupId: string, name: string): Promise<void> {
+  const { error } = await supabase.from('groups').update({ name }).eq('id', groupId);
+  if (error) throw error;
+}
+
 export async function updateCounterSettings(
   counterId: string,
   settings: { name: string; soundId: SoundId; geolocEnabled: boolean; photoEnabled: boolean }

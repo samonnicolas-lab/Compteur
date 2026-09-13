@@ -139,6 +139,15 @@ create policy "Un utilisateur peut créer un groupe"
   to authenticated
   with check (owner_id = auth.uid());
 
+-- Renommer un groupe partagé (visible par tous les membres, une seule ligne
+-- en base) : réservé au propriétaire du groupe.
+drop policy if exists "Le propriétaire peut renommer son groupe" on public.groups;
+create policy "Le propriétaire peut renommer son groupe"
+  on public.groups for update
+  to authenticated
+  using (owner_id = auth.uid())
+  with check (owner_id = auth.uid());
+
 -- Un utilisateur qui rejoint un groupe pour la première fois n'est pas encore
 -- membre : sans visibilité SELECT sur group_members, Postgres ne peut pas
 -- évaluer la détection de conflit de l'upsert (insert ... on conflict do

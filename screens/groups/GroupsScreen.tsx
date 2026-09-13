@@ -1,7 +1,7 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -17,6 +17,7 @@ import {
   fetchGroupById,
   fetchGroupMembers,
   updateCounterGroupId,
+  updateGroupName,
 } from '../../lib/api';
 import { buildInviteMessage } from '../../lib/appLinks';
 import { bestLocatorsRanking, globetrotterRanking } from '../../lib/ranking';
@@ -38,6 +39,7 @@ export function GroupsScreen({ route }: Props) {
   const { session } = useAuth();
   const [groupId, setGroupId] = useState<string | null>(null);
   const [groupName, setGroupName] = useState('');
+  const [groupOwnerId, setGroupOwnerId] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState('');
   const [members, setMembers] = useState<{ user_id: string; pseudo: string }[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -46,6 +48,10 @@ export function GroupsScreen({ route }: Props) {
 
   const [newGroupName, setNewGroupName] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const [renameSaving, setRenameSaving] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +68,7 @@ export function GroupsScreen({ route }: Props) {
       ]);
       setGroupId(group.id);
       setGroupName(group.name);
+      setGroupOwnerId(group.owner_id);
       setInviteCode(group.invite_code);
       setMembers(groupMembers.map((m) => ({ user_id: m.user_id, pseudo: m.profiles.pseudo })));
       setEntries(groupEntries);
@@ -77,6 +84,25 @@ export function GroupsScreen({ route }: Props) {
       load();
     }, [load])
   );
+
+  function handleRenamePress() {
+    setRenameValue(groupName);
+    setRenaming(true);
+  }
+
+  async function handleRenameConfirm() {
+    if (!groupId || !renameValue.trim()) return;
+    setRenameSaving(true);
+    try {
+      await updateGroupName(groupId, renameValue.trim());
+      setGroupName(renameValue.trim());
+      setRenaming(false);
+    } catch (error) {
+      alert('Erreur', (error as Error).message);
+    } finally {
+      setRenameSaving(false);
+    }
+  }
 
   function handleInvitePress() {
     alert(
@@ -148,7 +174,18 @@ export function GroupsScreen({ route }: Props) {
   return (
     <ScreenContainer>
       <ScrollView>
-        <Text style={styles.title}>{groupName}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{groupName}</Text>
+          {session?.user.id === groupOwnerId && (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Renommer le groupe"
+              onPress={handleRenamePress}
+            >
+              <Text style={styles.editIcon}>✏️</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <TouchableOpacity onPress={handleInvitePress}>
           <Text style={styles.inviteCode}>Code d’invitation : {inviteCode} 📩</Text>
         </TouchableOpacity>
@@ -178,15 +215,52 @@ export function GroupsScreen({ route }: Props) {
           <RankingList rows={globetrotters} />
         </Card>
       </ScrollView>
+
+      <Modal visible={renaming} transparent animationType="fade" onRequestClose={() => setRenaming(false)}>
+        <View style={styles.renameOverlay}>
+          <Card style={styles.renameCard}>
+            <Text style={styles.sectionTitle}>Renommer le groupe</Text>
+            <TextField
+              label="Nom du groupe"
+              value={renameValue}
+              onChangeText={setRenameValue}
+              autoFocus
+            />
+            <View style={styles.renameActions}>
+              <Button
+                label="Annuler"
+                variant="ghost"
+                onPress={() => setRenaming(false)}
+                style={styles.renameActionButton}
+              />
+              <Button
+                label="Enregistrer"
+                onPress={handleRenameConfirm}
+                loading={renameSaving}
+                disabled={!renameValue.trim()}
+                style={styles.renameActionButton}
+              />
+            </View>
+          </Card>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   title: {
     color: colors.accent,
     fontSize: 22,
     fontWeight: '700',
+  },
+  editIcon: {
+    fontSize: 18,
   },
   subtitle: {
     color: colors.textMuted,
@@ -233,5 +307,23 @@ const styles = StyleSheet.create({
   periodChipLabelActive: {
     color: colors.background,
     fontWeight: '600',
+  },
+  renameOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  renameCard: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  renameActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  renameActionButton: {
+    flex: 1,
   },
 });
