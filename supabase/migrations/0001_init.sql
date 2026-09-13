@@ -166,6 +166,15 @@ create policy "Un utilisateur peut mettre à jour sa propre adhésion à un grou
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
 
+-- Nécessaire pour quitter un groupe automatiquement à la suppression de son
+-- propre compteur (voir deleteCounter côté app) : sans cette policy, la
+-- ligne d'adhésion resterait orpheline (membre "fantôme" à 0 clic).
+drop policy if exists "Un utilisateur peut quitter un groupe (supprimer sa propre adhésion)" on public.group_members;
+create policy "Un utilisateur peut quitter un groupe (supprimer sa propre adhésion)"
+  on public.group_members for delete
+  to authenticated
+  using (user_id = auth.uid());
+
 -- ---------------------------------------------------------------------------
 -- counters
 -- ---------------------------------------------------------------------------
@@ -296,6 +305,18 @@ create policy "Un utilisateur connecté peut déposer une photo dans son propre 
   on storage.objects for insert
   to authenticated
   with check (
+    bucket_id = 'entry-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Nécessaire pour nettoyer les photos devenues orphelines lors d'une
+-- réinitialisation ou d'une suppression de compteur (voir resetCounterEntries
+-- et deleteCounter côté app).
+drop policy if exists "Un utilisateur peut supprimer ses propres photos" on storage.objects;
+create policy "Un utilisateur peut supprimer ses propres photos"
+  on storage.objects for delete
+  to authenticated
+  using (
     bucket_id = 'entry-photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );

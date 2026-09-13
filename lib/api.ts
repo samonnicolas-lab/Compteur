@@ -231,9 +231,62 @@ export async function fetchEntriesForMap(counterId: string): Promise<EntryWithPs
   return (data ?? []) as unknown as EntryWithPseudo[];
 }
 
+// Supprime du bucket `entry-photos` les fichiers correspondant à des URLs
+// publiques données (extraites de entries.photo_url). Best-effort : un échec
+// de nettoyage du stockage ne doit jamais empêcher la suppression des
+// données elles-mêmes (clics, compteur), donc on journalise sans relancer.
+async function removeEntryPhotos(photoUrls: (string | null)[]): Promise<void> {
+  const paths = photoUrls
+    .filter((url): url is string => !!url)
+    .map((url) => url.split('/entry-photos/')[1])
+    .filter((path): path is string => !!path);
+  if (paths.length === 0) return;
+
+  try {
+    const { error } = await supabase.storage.from('entry-photos').remove(paths);
+    if (error) throw error;
+  } catch (error) {
+    console.warn('[storage] échec de la suppression de photos orphelines', error);
+  }
+}
+
 export async function resetCounterEntries(counterId: string): Promise<void> {
+  const { data: entries, error: fetchError } = await supabase
+    .from('entries')
+    .select('photo_url')
+    .eq('counter_id', counterId);
+  if (fetchError) throw fetchError;
+  await removeEntryPhotos((entries ?? []).map((e) => e.photo_url));
+
   const { error } = await supabase.from('entries').delete().eq('counter_id', counterId);
   if (error) throw error;
+}
+
+// Supprime le compteur (les clics associés partent en cascade côté base).
+// Si ce compteur appartenait à un groupe, retire aussi son adhésion
+// (group_members) : la supprimer sans quitter le groupe laisserait un
+// membre "fantôme" visible dans les classements avec 0 clic.
+export async function deleteCounter(counterId: string, userId: string): Promise<void> {
+  const counter = await fetchCounterById(counterId);
+
+  const { data: entries, error: fetchError } = await supabase
+    .from('entries')
+    .select('photo_url')
+    .eq('counter_id', counterId);
+  if (fetchError) throw fetchError;
+  await removeEntryPhotos((entries ?? []).map((e) => e.photo_url));
+
+  const { error } = await supabase.from('counters').delete().eq('id', counterId);
+  if (error) throw error;
+
+  if (counter.group_id) {
+    const { error: leaveError } = await supabase
+      .from('group_members')
+      .delete()
+      .eq('group_id', counter.group_id)
+      .eq('user_id', userId);
+    if (leaveError) throw leaveError;
+  }
 }
 
 export async function uploadEntryPhoto(userId: string, localUri: string): Promise<string> {
