@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Text } from 'react-native';
 
 import { fetchCounterById } from '../lib/api';
@@ -26,12 +27,16 @@ export function CounterTabsNavigator({ route, navigation }: Props) {
   const { counterId } = route.params;
 
   // Affiche le nom du compteur dans le header (voir RootNavigator), qui
-  // porte aussi le bouton retour vers l'Accueil.
-  useEffect(() => {
-    fetchCounterById(counterId)
-      .then((counter) => navigation.setOptions({ title: counter.name }))
-      .catch(() => {});
-  }, [counterId, navigation]);
+  // porte aussi le bouton retour vers l'Accueil. Rechargé à chaque focus
+  // (pas juste au montage) pour refléter un renommage fait depuis les
+  // Réglages du compteur en revenant sur cet écran.
+  useFocusEffect(
+    useCallback(() => {
+      fetchCounterById(counterId)
+        .then((counter) => navigation.setOptions({ title: counter.name }))
+        .catch(() => {});
+    }, [counterId, navigation])
+  );
 
   return (
     <Tab.Navigator

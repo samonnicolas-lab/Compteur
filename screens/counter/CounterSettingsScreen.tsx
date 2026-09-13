@@ -6,10 +6,12 @@ import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { SoundPicker } from '../../components/SoundPicker';
+import { TextField } from '../../components/TextField';
 import { alert } from '../../lib/alert';
 import { fetchCounterById, updateCounterSettings } from '../../lib/api';
 import { colors, spacing } from '../../lib/theme';
-import { Counter } from '../../lib/types';
+import { Counter, SoundId } from '../../lib/types';
 import { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CounterSettings'>;
@@ -17,6 +19,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CounterSettings'>;
 export function CounterSettingsScreen({ route, navigation }: Props) {
   const { counterId } = route.params;
   const [counter, setCounter] = useState<Counter | null>(null);
+  const [name, setName] = useState('');
+  const [soundId, setSoundId] = useState<SoundId>('clic');
   const [geolocEnabled, setGeolocEnabled] = useState(false);
   const [photoEnabled, setPhotoEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -25,6 +29,8 @@ export function CounterSettingsScreen({ route, navigation }: Props) {
     try {
       const c = await fetchCounterById(counterId);
       setCounter(c);
+      setName(c.name);
+      setSoundId(c.sound_id);
       setGeolocEnabled(c.geoloc_enabled);
       setPhotoEnabled(c.photo_enabled);
     } catch (error) {
@@ -39,9 +45,13 @@ export function CounterSettingsScreen({ route, navigation }: Props) {
   );
 
   async function handleSave() {
+    if (!name.trim()) {
+      alert('Nom manquant', 'Merci de renseigner un nom pour le compteur.');
+      return;
+    }
     setSaving(true);
     try {
-      await updateCounterSettings(counterId, { geolocEnabled, photoEnabled });
+      await updateCounterSettings(counterId, { name: name.trim(), soundId, geolocEnabled, photoEnabled });
       navigation.goBack();
     } catch (error) {
       alert('Erreur', (error as Error).message);
@@ -57,7 +67,12 @@ export function CounterSettingsScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer>
       <ScrollView>
-        <Text style={styles.title}>Réglages de {counter.name}</Text>
+        <Text style={styles.title}>Réglages du compteur</Text>
+
+        <TextField label="Nom du compteur" value={name} onChangeText={setName} />
+
+        <Text style={styles.sectionTitle}>Son du bouton</Text>
+        <SoundPicker value={soundId} onChange={setSoundId} />
 
         <Card style={styles.optionRow}>
           <View style={styles.optionText}>
@@ -99,6 +114,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   optionRow: {
     flexDirection: 'row',

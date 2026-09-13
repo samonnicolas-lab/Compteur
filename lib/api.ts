@@ -117,11 +117,16 @@ export async function updateCounterGroupId(counterId: string, groupId: string): 
 
 export async function updateCounterSettings(
   counterId: string,
-  settings: { geolocEnabled: boolean; photoEnabled: boolean }
+  settings: { name: string; soundId: SoundId; geolocEnabled: boolean; photoEnabled: boolean }
 ): Promise<void> {
   const { error } = await supabase
     .from('counters')
-    .update({ geoloc_enabled: settings.geolocEnabled, photo_enabled: settings.photoEnabled })
+    .update({
+      name: settings.name,
+      sound_id: settings.soundId,
+      geoloc_enabled: settings.geolocEnabled,
+      photo_enabled: settings.photoEnabled,
+    })
     .eq('id', counterId);
   if (error) throw error;
 }
