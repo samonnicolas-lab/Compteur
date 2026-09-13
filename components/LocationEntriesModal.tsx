@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { formatDateTime } from '../lib/dateRanges';
@@ -11,6 +11,8 @@ interface Props {
 }
 
 export function LocationEntriesModal({ cluster, onClose }: Props) {
+  const [enlargedPhotoUrl, setEnlargedPhotoUrl] = useState<string | null>(null);
+
   return (
     <Modal visible={!!cluster} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -31,7 +33,9 @@ export function LocationEntriesModal({ cluster, onClose }: Props) {
             renderItem={({ item }) => (
               <View style={styles.row}>
                 {item.photoUrl ? (
-                  <Image source={{ uri: item.photoUrl }} style={styles.thumbnail} />
+                  <TouchableOpacity onPress={() => setEnlargedPhotoUrl(item.photoUrl!)}>
+                    <Image source={{ uri: item.photoUrl }} style={styles.thumbnail} />
+                  </TouchableOpacity>
                 ) : (
                   <View style={styles.thumbnailPlaceholder} />
                 )}
@@ -41,6 +45,27 @@ export function LocationEntriesModal({ cluster, onClose }: Props) {
           />
         </View>
       </View>
+
+      <Modal
+        visible={!!enlargedPhotoUrl}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEnlargedPhotoUrl(null)}
+      >
+        <TouchableOpacity
+          style={styles.zoomOverlay}
+          activeOpacity={1}
+          onPress={() => setEnlargedPhotoUrl(null)}
+        >
+          {enlargedPhotoUrl && (
+            <Image
+              source={{ uri: enlargedPhotoUrl }}
+              style={styles.zoomedImage}
+              resizeMode="contain"
+            />
+          )}
+        </TouchableOpacity>
+      </Modal>
     </Modal>
   );
 }
@@ -101,5 +126,15 @@ const styles = StyleSheet.create({
   rowText: {
     color: colors.text,
     fontSize: 15,
+  },
+  zoomOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  zoomedImage: {
+    width: '100%',
+    height: '100%',
   },
 });
