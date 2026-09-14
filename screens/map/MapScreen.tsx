@@ -38,6 +38,7 @@ export function MapScreen({ route }: Props) {
             timestamp: e.timestamp,
             photo_url: e.photo_url,
             pseudo: e.profiles?.pseudo ?? null,
+            counterEmoji: e.counters?.emoji ?? null,
           }))
         )
       );

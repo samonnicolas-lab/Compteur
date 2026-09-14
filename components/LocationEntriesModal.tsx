@@ -37,7 +37,9 @@ export function LocationEntriesModal({ cluster, onClose }: Props) {
                     <Image source={{ uri: item.photoUrl }} style={styles.thumbnail} />
                   </TouchableOpacity>
                 ) : (
-                  <View style={styles.thumbnailPlaceholder} />
+                  <View style={styles.thumbnailPlaceholder}>
+                    <Text style={styles.thumbnailPlaceholderEmoji}>{item.counterEmoji || '🔘'}</Text>
+                  </View>
                 )}
                 <View>
                   {item.pseudo && <Text style={styles.rowPseudo}>{item.pseudo}</Text>}
@@ -125,6 +127,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: spacing.md,
     backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbnailPlaceholderEmoji: {
+    fontSize: 22,
   },
   rowPseudo: {
     color: colors.accentLight,

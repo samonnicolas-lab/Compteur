@@ -63,11 +63,18 @@ export function CounterScreen({ route, navigation }: Props) {
   }
 
   // Capture la position en arrière-plan sans bloquer l'enregistrement du clic.
+  // L'échec ne doit jamais empêcher le clic d'être compté (déjà enregistré
+  // avant l'appel), mais doit rester visible : sans ça, un refus
+  // d'autorisation ou un GPS indisponible passait totalement inaperçu — le
+  // clic semblait réussir alors que la position n'était jamais capturée.
   async function captureLocationInBackground(entryId: string) {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
       if (!permission.granted) {
-        console.warn('[geoloc] permission refusée', permission);
+        alert(
+          'Position non enregistrée',
+          'Ce clic a bien été compté, mais la localisation n’a pas pu être ajoutée : l’autorisation de localisation a été refusée. Activez-la pour ce site dans les réglages de votre téléphone si vous voulez que vos prochains clics apparaissent sur la carte.'
+        );
         return;
       }
       const position = await Location.getCurrentPositionAsync({
@@ -79,10 +86,12 @@ export function CounterScreen({ route, navigation }: Props) {
         position.coords.longitude,
         position.coords.accuracy ?? null
       );
-      console.log('[geoloc] position enregistrée pour', entryId, position.coords);
     } catch (error) {
-      // Position indisponible : le clic reste enregistré sans coordonnées.
-      console.warn('[geoloc] échec de la capture/enregistrement de la position', error);
+      // Position indisponible (GPS, timeout...) : le clic reste enregistré sans coordonnées.
+      alert(
+        'Position non enregistrée',
+        `Ce clic a bien été compté, mais la localisation n’a pas pu être capturée (${(error as Error).message}).`
+      );
     }
   }
 

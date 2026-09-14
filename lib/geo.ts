@@ -29,6 +29,9 @@ export interface ClusterEntryDetail {
   timestamp: string;
   photoUrl: string | null;
   pseudo: string | null;
+  // Emoji du compteur à l'origine du clic, affiché à la place de la photo
+  // quand celle-ci est absente (ex. option photo désactivée sur ce compteur).
+  counterEmoji: string | null;
 }
 
 export interface MapCluster {
@@ -47,6 +50,7 @@ export interface MapEntry {
   timestamp: string;
   photo_url: string | null;
   pseudo?: string | null;
+  counterEmoji?: string | null;
 }
 
 // Regroupe les entrées géolocalisées par lieu arrondi, pour l'affichage sur la carte.
@@ -63,6 +67,7 @@ export function clusterEntriesByLocation(entries: MapEntry[]): MapCluster[] {
       timestamp: entry.timestamp,
       photoUrl: entry.photo_url,
       pseudo: entry.pseudo ?? null,
+      counterEmoji: entry.counterEmoji ?? null,
     };
 
     const existing = clusters.get(key);
